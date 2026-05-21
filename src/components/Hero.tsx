@@ -4,16 +4,36 @@ import siteContent from '../data/siteContent.json';
 export default function Hero() {
   const { hero } = siteContent;
   const titleParts = hero.title.split(hero.highlight);
+  const hasBackgroundImage = Boolean(hero.backgroundImage);
 
   return (
-    <section className="relative h-screen flex items-center justify-center bg-metal-gradient overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-          backgroundSize: '40px 40px',
-        }}
-      ></div>
+    <section
+      className="relative h-screen flex items-center justify-center bg-metal-gradient overflow-hidden"
+      style={
+        hasBackgroundImage
+          ? {
+              backgroundImage: `url(${hero.backgroundImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }
+          : undefined
+      }
+    >
+      {hasBackgroundImage ? (
+        <div className="absolute inset-0 bg-slate-950/70"></div>
+      ) : (
+        <>
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+              backgroundSize: '40px 40px',
+            }}
+          ></div>
+          <div className="absolute inset-0 bg-slate-950/10"></div>
+        </>
+      )}
 
       <div className="relative z-10 text-center px-4 animate-fade-in">
         <h2 className="text-brand-blue font-bold tracking-widest mb-4 text-lg md:text-xl uppercase">
