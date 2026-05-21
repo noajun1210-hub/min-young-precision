@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import {
   Save,
   Download,
@@ -6,11 +6,12 @@ import {
   Building2,
   Mail,
   MapPin,
-  Phone,
   ListChecks,
   AlertTriangle,
   CheckCircle2,
   Loader2,
+  LogOut,
+  Github,
 } from 'lucide-react';
 import { githubContentConfig, loadSiteContent, saveSiteContent } from '../lib/githubContent';
 
@@ -179,7 +180,7 @@ function AdminSection({
 }: {
   title: string;
   description?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -193,8 +194,11 @@ function AdminSection({
 }
 
 export default function Admin() {
+  const [repositoryOwner, setRepositoryOwner] = useState(githubContentConfig.owner);
+  const [repositoryName, setRepositoryName] = useState(githubContentConfig.repo);
   const [token, setToken] = useState(() => localStorage.getItem('minyoung_github_token') || '');
   const [rememberToken, setRememberToken] = useState(() => Boolean(localStorage.getItem('minyoung_github_token')));
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [content, setContent] = useState<SiteContent | null>(null);
   const [status, setStatus] = useState<StatusType>('idle');
   const [message, setMessage] = useState('');
@@ -210,9 +214,25 @@ export default function Admin() {
     setMessage(nextMessage);
   }
 
-  async function handleLoad() {
+  function validateLoginInfo() {
+    if (repositoryOwner.trim() !== githubContentConfig.owner) {
+      throw new Error(`Repository Owner는 ${githubContentConfig.owner}로 입력해주세요.`);
+    }
+
+    if (repositoryName.trim() !== githubContentConfig.repo) {
+      throw new Error(`Repository Name은 ${githubContentConfig.repo}로 입력해주세요.`);
+    }
+
+    if (!token.trim()) {
+      throw new Error('GitHub Personal Access Token을 입력해주세요.');
+    }
+  }
+
+  async function handleLogin() {
     try {
-      setStatusMessage('loading', 'GitHub에서 홈페이지 데이터를 불러오는 중입니다.');
+      validateLoginInfo();
+
+      setStatusMessage('loading', 'GitHub 저장소에 접속하는 중입니다.');
 
       if (rememberToken) {
         localStorage.setItem('minyoung_github_token', token.trim());
@@ -222,7 +242,20 @@ export default function Admin() {
 
       const result = await loadSiteContent(token);
       setContent(result.content as SiteContent);
-      setStatusMessage('success', '홈페이지 데이터를 불러왔습니다.');
+      setIsAuthenticated(true);
+      setStatusMessage('success', '관리자 페이지 접속이 완료되었습니다.');
+    } catch (error) {
+      setStatusMessage('error', error instanceof Error ? error.message : '접속하지 못했습니다.');
+    }
+  }
+
+  async function handleLoad() {
+    try {
+      setStatusMessage('loading', 'GitHub에서 홈페이지 데이터를 다시 불러오는 중입니다.');
+
+      const result = await loadSiteContent(token);
+      setContent(result.content as SiteContent);
+      setStatusMessage('success', '홈페이지 데이터를 다시 불러왔습니다.');
     } catch (error) {
       setStatusMessage('error', error instanceof Error ? error.message : '데이터를 불러오지 못했습니다.');
     }
@@ -237,16 +270,22 @@ export default function Admin() {
     try {
       setStatusMessage('loading', '수정 내용을 GitHub에 저장하는 중입니다.');
 
-      if (rememberToken) {
-        localStorage.setItem('minyoung_github_token', token.trim());
-      } else {
-        localStorage.removeItem('minyoung_github_token');
-      }
-
       await saveSiteContent(token, content);
       setStatusMessage('success', '저장 완료! Cloudflare Pages가 자동으로 다시 배포됩니다. 보통 1~2분 정도 걸립니다.');
     } catch (error) {
       setStatusMessage('error', error instanceof Error ? error.message : '저장하지 못했습니다.');
+    }
+  }
+
+  function handleLogout() {
+    setIsAuthenticated(false);
+    setContent(null);
+    setStatus('idle');
+    setMessage('');
+
+    if (!rememberToken) {
+      setToken('');
+      localStorage.removeItem('minyoung_github_token');
     }
   }
 
@@ -417,6 +456,104 @@ export default function Admin() {
     });
   }
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-md rounded-[2rem] bg-zinc-950 px-8 py-10 text-white shadow-2xl sm:px-12">
+          <div className="mx-auto mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-500">
+            <KeyRound size={28} />
+          </div>
+
+          <div className="text-center">
+            <h1 className="text-2xl font-black tracking-tight">Admin CMS 접속</h1>
+            <p className="mt-3 text-sm text-slate-300">
+              GitHub Personal Access Token이 필요합니다.
+            </p>
+          </div>
+
+          <div className="mt-10 space-y-6">
+            <label className="block">
+              <span className="block text-xs font-black uppercase tracking-wider text-white">
+                Repository Owner
+              </span>
+              <input
+                type="text"
+                value={repositoryOwner}
+                onChange={(event) => setRepositoryOwner(event.target.value)}
+                className="mt-2 w-full rounded-xl border border-white/15 bg-zinc-900 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20"
+              />
+            </label>
+
+            <label className="block">
+              <span className="block text-xs font-black uppercase tracking-wider text-white">
+                Repository Name
+              </span>
+              <input
+                type="text"
+                value={repositoryName}
+                onChange={(event) => setRepositoryName(event.target.value)}
+                className="mt-2 w-full rounded-xl border border-white/15 bg-zinc-900 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20"
+              />
+            </label>
+
+            <label className="block">
+              <span className="block text-xs font-black uppercase tracking-wider text-white">
+                Personal Access Token (Fine-grained)
+              </span>
+              <input
+                type="password"
+                value={token}
+                onChange={(event) => setToken(event.target.value)}
+                className="mt-2 w-full rounded-xl border border-white/15 bg-zinc-900 px-4 py-3 text-sm text-white outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20"
+              />
+            </label>
+
+            <label className="inline-flex items-center gap-2 text-xs text-slate-400">
+              <input
+                type="checkbox"
+                checked={rememberToken}
+                onChange={(event) => setRememberToken(event.target.checked)}
+                className="h-4 w-4 rounded border-white/20 bg-zinc-900"
+              />
+              이 기기에 토큰 임시 저장
+            </label>
+
+            {message && (
+              <div
+                className={`rounded-2xl px-4 py-3 text-sm ${
+                  status === 'error'
+                    ? 'bg-red-500/10 text-red-200'
+                    : status === 'success'
+                      ? 'bg-emerald-500/10 text-emerald-200'
+                      : 'bg-blue-500/10 text-blue-200'
+                }`}
+              >
+                {message}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleLogin}
+              disabled={isBusy}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Github size={18} />}
+              인증 및 접속
+            </button>
+
+            <a
+              href="/"
+              className="block text-center text-xs font-bold text-slate-300 transition hover:text-white"
+            >
+              홈으로 돌아가기
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <header className="bg-slate-950 text-white">
@@ -430,51 +567,38 @@ export default function Admin() {
               </p>
             </div>
 
-            <a
-              href="/"
-              className="inline-flex items-center justify-center rounded-xl border border-white/20 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-            >
-              홈페이지로 돌아가기
-            </a>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <a
+                href="/"
+                className="inline-flex items-center justify-center rounded-xl border border-white/20 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                홈페이지로 돌아가기
+              </a>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-100"
+              >
+                <LogOut size={16} />
+                로그아웃
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-700">
-                <KeyRound size={18} />
-                GitHub 토큰
-              </div>
-
-              <input
-                type="password"
-                value={token}
-                onChange={(event) => setToken(event.target.value)}
-                placeholder="GitHub Fine-grained token을 입력하세요"
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-              />
-
-              <div className="mt-3 flex flex-col gap-2 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-                <label className="inline-flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={rememberToken}
-                    onChange={(event) => setRememberToken(event.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300"
-                  />
-                  이 기기에 토큰 임시 저장
-                </label>
-
-                <span>
-                  대상 파일: {repositoryLabel} / {githubContentConfig.path}
-                </span>
-              </div>
+              <p className="text-sm font-bold text-slate-900">연결된 저장소</p>
+              <p className="mt-1 text-sm text-slate-500">
+                {repositoryLabel} / {githubContentConfig.path}
+              </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
                 onClick={handleLoad}
@@ -482,7 +606,7 @@ export default function Admin() {
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                데이터 불러오기
+                데이터 새로고침
               </button>
 
               <button
@@ -523,10 +647,7 @@ export default function Admin() {
         {!content ? (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
             <ListChecks size={42} className="mx-auto text-slate-400" />
-            <h2 className="mt-4 text-xl font-bold text-slate-900">먼저 데이터를 불러와주세요.</h2>
-            <p className="mt-2 text-sm text-slate-500">
-              GitHub 토큰을 입력하고 “데이터 불러오기”를 누르면 수정 화면이 나타납니다.
-            </p>
+            <h2 className="mt-4 text-xl font-bold text-slate-900">데이터를 불러오는 중입니다.</h2>
           </div>
         ) : (
           <div className="space-y-6">
@@ -731,7 +852,7 @@ export default function Admin() {
       </main>
 
       <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           <Building2 size={14} />
           <span>Min Young Precision Admin</span>
           <span>·</span>
