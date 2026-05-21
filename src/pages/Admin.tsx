@@ -12,8 +12,17 @@ import {
   Loader2,
   LogOut,
   Github,
+  ImagePlus,
+  Trash2,
+  UploadCloud,
 } from 'lucide-react';
-import { githubContentConfig, loadSiteContent, saveSiteContent } from '../lib/githubContent';
+import {
+  deleteUploadedImage,
+  githubContentConfig,
+  loadSiteContent,
+  saveSiteContent,
+  uploadHeroBackgroundImage,
+} from '../lib/githubContent';
 
 type CompanyInfo = {
   name: string;
@@ -37,6 +46,7 @@ type HeroContent = {
   title: string;
   highlight: string;
   description: string;
+  backgroundImage: string;
   primaryButton: {
     label: string;
     href: string;
@@ -202,6 +212,7 @@ export default function Admin() {
   const [content, setContent] = useState<SiteContent | null>(null);
   const [status, setStatus] = useState<StatusType>('idle');
   const [message, setMessage] = useState('');
+  const [selectedHeroImage, setSelectedHeroImage] = useState<File | null>(null);
 
   const isBusy = status === 'loading';
 
@@ -277,11 +288,80 @@ export default function Admin() {
     }
   }
 
+  async function handleHeroImageUpload() {
+    if (!content) {
+      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      return;
+    }
+
+    if (!selectedHeroImage) {
+      setStatusMessage('error', '업로드할 이미지를 선택해주세요.');
+      return;
+    }
+
+    try {
+      setStatusMessage('loading', '메인 배경 이미지를 GitHub에 업로드하는 중입니다.');
+
+      const uploadedImage = await uploadHeroBackgroundImage(token, selectedHeroImage);
+
+      const nextContent: SiteContent = {
+        ...content,
+        hero: {
+          ...content.hero,
+          backgroundImage: uploadedImage.publicPath,
+        },
+      };
+
+      await saveSiteContent(token, nextContent);
+
+      setContent(nextContent);
+      setSelectedHeroImage(null);
+      setStatusMessage('success', '메인 배경 이미지가 업로드되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+    } catch (error) {
+      setStatusMessage('error', error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.');
+    }
+  }
+
+  async function handleHeroImageDelete() {
+    if (!content) {
+      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      return;
+    }
+
+    if (!content.hero.backgroundImage) {
+      setStatusMessage('error', '삭제할 메인 배경 이미지가 없습니다.');
+      return;
+    }
+
+    try {
+      setStatusMessage('loading', '메인 배경 이미지를 삭제하는 중입니다.');
+
+      await deleteUploadedImage(token, content.hero.backgroundImage);
+
+      const nextContent: SiteContent = {
+        ...content,
+        hero: {
+          ...content.hero,
+          backgroundImage: '',
+        },
+      };
+
+      await saveSiteContent(token, nextContent);
+
+      setContent(nextContent);
+      setSelectedHeroImage(null);
+      setStatusMessage('success', '메인 배경 이미지가 삭제되었습니다. 기본 배경으로 돌아갑니다.');
+    } catch (error) {
+      setStatusMessage('error', error instanceof Error ? error.message : '이미지 삭제에 실패했습니다.');
+    }
+  }
+
   function handleLogout() {
     setIsAuthenticated(false);
     setContent(null);
     setStatus('idle');
     setMessage('');
+    setSelectedHeroImage(null);
 
     if (!rememberToken) {
       setToken('');
@@ -651,6 +731,94 @@ export default function Admin() {
           </div>
         ) : (
           <div className="space-y-6">
+            <AdminSection
+              title="메인 배경 이미지"
+              description="홈페이지 첫 화면의 배경 이미지를 업로드하거나 삭제할 수 있습니다. 권장 크기는 1920×1080 이상, 용량은 5MB 이하입니다."
+            >
+              <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
+                <div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <div className="flex items-center gap-3 text-slate-900">
+                      <ImagePlus size={22} className="text-blue-600" />
+                      <div>
+                        <h3 className="font-bold">배경 이미지 업로드</h3>
+                        <p className="mt-1 text-sm text-slate-500">
+                          JPG, PNG, WEBP, GIF 파일을 사용할 수 있습니다.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-5">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => setSelectedHeroImage(event.target.files?.[0] || null)}
+                        className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-slate-800"
+                      />
+
+                      {selectedHeroImage && (
+                        <p className="mt-3 text-sm text-slate-600">
+                          선택된 파일: <strong>{selectedHeroImage.name}</strong>
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                      <button
+                        type="button"
+                        onClick={handleHeroImageUpload}
+                        disabled={isBusy || !selectedHeroImage}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
+                        이미지 업로드 및 적용
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleHeroImageDelete}
+                        disabled={isBusy || !content.hero.backgroundImage}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
+                        현재 이미지 삭제
+                      </button>
+                    </div>
+
+                    <p className="mt-4 text-xs leading-relaxed text-slate-500">
+                      이미지를 업로드하면 GitHub의 public/uploads 폴더에 저장되고, 홈페이지 메인 배경으로 자동 적용됩니다.
+                      삭제하면 기본 다크 그라데이션 배경으로 돌아갑니다.
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-sm font-bold text-slate-700">현재 배경 이미지</p>
+
+                  {content.hero.backgroundImage ? (
+                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                      <img
+                        src={content.hero.backgroundImage}
+                        alt="현재 메인 배경 이미지"
+                        className="h-56 w-full object-cover"
+                      />
+                      <div className="border-t border-slate-200 bg-white p-4">
+                        <p className="break-all text-xs text-slate-500">{content.hero.backgroundImage}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 text-center">
+                      <div>
+                        <ImagePlus size={34} className="mx-auto text-slate-400" />
+                        <p className="mt-3 text-sm font-bold text-slate-700">현재 설정된 이미지가 없습니다.</p>
+                        <p className="mt-1 text-xs text-slate-500">기본 다크 그라데이션 배경이 표시됩니다.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </AdminSection>
+
             <AdminSection title="회사 기본 정보" description="회사명, 대표자, 연락처, 주소 등 홈페이지 전반에 사용되는 정보입니다.">
               <div className="grid gap-5 md:grid-cols-2">
                 <TextInput label="회사명" value={content.company.name} onChange={(value) => updateCompany('name', value)} />
