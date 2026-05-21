@@ -1,0 +1,162 @@
+{
+  "company": {
+    "name": "민영정밀",
+    "englishName": "Min Young Precision",
+    "representative": "조지훈",
+    "email": "jjh110374@daum.net",
+    "phone": "",
+    "fax": "",
+    "address": "충청남도 천안시",
+    "businessNumber": "",
+    "tagline": "Automotive · Semiconductor · Precision Machinery"
+  },
+  "navigation": [
+    {
+      "label": "회사소개",
+      "href": "#about"
+    },
+    {
+      "label": "사업분야",
+      "href": "#services"
+    },
+    {
+      "label": "기술력",
+      "href": "#expertise"
+    },
+    {
+      "label": "강점",
+      "href": "#strengths"
+    },
+    {
+      "label": "문의하기",
+      "href": "#contact"
+    }
+  ],
+  "hero": {
+    "eyebrow": "Precision Machining Standard",
+    "title": "정밀가공의 기준, 민영정밀",
+    "highlight": "민영정밀",
+    "description": "자동차 · 반도체 · 정밀기계 부품 가공 전문\n최고의 기술력으로 완벽한 품질을 약속합니다.",
+    "primaryButton": {
+      "label": "문의하기",
+      "href": "#contact"
+    },
+    "secondaryButton": {
+      "label": "사업 분야 보기",
+      "href": "#services"
+    }
+  },
+  "about": {
+    "eyebrow": "About Us",
+    "title": "숙련된 기술과 신뢰를 바탕으로\n미래를 가공합니다.",
+    "paragraphs": [
+      "충남 천안에 위치한 민영정밀은 자동차, 반도체, 정밀기계 분야의 핵심 부품 가공과 치공구 및 기구 제작을 수행하는 정밀가공 전문 기업입니다.",
+      "단순한 가공을 넘어 설계 의도를 정확히 파악하고, MCT 및 CNC 선반 가공의 풍부한 경험을 바탕으로 최적의 솔루션을 제공합니다.",
+      "특히 콜렛척(Collet Chuck) 전문 가공에 있어 특허 출원 및 등록을 통해 기술 전문성을 대외적으로 인정받고 있습니다."
+    ],
+    "visualTitle": "Min Young",
+    "visualSubtitle": "Precision"
+  },
+  "services": {
+    "eyebrow": "Business Fields",
+    "title": "주요 사업 분야",
+    "items": [
+      {
+        "title": "자동차 부품 가공",
+        "description": "고정밀 엔진 및 변속기 관련 부품 및 전장 부품 가공",
+        "icon": "car"
+      },
+      {
+        "title": "반도체 부품 가공",
+        "description": "고순도 가공이 요구되는 반도체 장비 핵심 파츠 제작",
+        "icon": "cpu"
+      },
+      {
+        "title": "정밀기계 부품 가공",
+        "description": "산업용 로봇 및 자동화 설비 정밀 부품 제작",
+        "icon": "settings"
+      },
+      {
+        "title": "설계 및 치공구 제작",
+        "description": "생산 효율 극대화를 위한 맞춤형 치공구 설계/제작",
+        "icon": "penTool"
+      },
+      {
+        "title": "기구 제작",
+        "description": "산업용 기구 및 프로토타입 정밀 제작",
+        "icon": "layers"
+      },
+      {
+        "title": "MCT / CNC 가공",
+        "description": "최신 설비를 통한 복합 정밀 가공 및 대량 대응",
+        "icon": "database"
+      }
+    ]
+  },
+  "expertise": {
+    "eyebrow": "Our Expertise",
+    "title": "차별화된 전문 기술력",
+    "mainTitle": "콜렛척 관련 특허 출원 및 등록 기술 보유",
+    "mainDescription": "콜렛척 전문 제작 업체로서 독자적인 기술력을 보유하고 있으며, 특허 출원 및 등록을 통해 고성능 제품을 공급합니다.",
+    "points": [
+      "고정밀도 공차 유지",
+      "내구성 극대화 가공",
+      "맞춤형 특수 사양 제작",
+      "안정적인 고속 회전 밸런스"
+    ],
+    "cards": [
+      {
+        "title": "MCT 가공",
+        "description": "최적의 가공 공법을 적용하여 고객이 원하는 고품질 결과물을 도출합니다."
+      },
+      {
+        "title": "CNC 선반 가공",
+        "description": "최적의 가공 공법을 적용하여 고객이 원하는 고품질 결과물을 도출합니다."
+      },
+      {
+        "title": "소량 다품종 대응",
+        "description": "최적의 가공 공법을 적용하여 고객이 원하는 고품질 결과물을 도출합니다."
+      },
+      {
+        "title": "설계 기반 맞춤 제작",
+        "description": "최적의 가공 공법을 적용하여 고객이 원하는 고품질 결과물을 도출합니다."
+      }
+    ]
+  },
+  "strengths": {
+    "eyebrow": "Our Strengths",
+    "title": "민영정밀의 경쟁력",
+    "items": [
+      {
+        "title": "정밀한 가공 품질",
+        "description": "마이크로 단위의 정밀도를 추구하여 완벽한 제품을 납품합니다.",
+        "icon": "microscope"
+      },
+      {
+        "title": "현장 경험 기반 제작",
+        "description": "수십 년간 쌓아온 노하우로 최적의 솔루션을 제안합니다.",
+        "icon": "cog"
+      },
+      {
+        "title": "설계부터 제작까지",
+        "description": "설계와 치공구 제작까지 원스톱 대응 시스템을 갖추고 있습니다.",
+        "icon": "zap"
+      },
+      {
+        "title": "산업별 최적화",
+        "description": "자동차, 반도체 분야별 특성에 맞는 소재와 공법을 적용합니다.",
+        "icon": "shieldCheck"
+      }
+    ]
+  },
+  "contact": {
+    "title": "프로젝트 문의하기",
+    "description": "도면 검토 및 견적 문의는 아래 연락처로 주시면\n친절하고 정확하게 상담해 드리겠습니다.",
+    "emailButtonTitle": "이메일 보내기",
+    "emailButtonDescription": "간편하게 견적 및 가공 의뢰를 남겨주세요",
+    "emailButtonSmallText": "Click to Send"
+  },
+  "footer": {
+    "copyrightText": "All rights reserved."
+  }
+}
