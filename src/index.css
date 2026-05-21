@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-slate-900 antialiased;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.bg-metal-gradient {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.bg-subtle-gray {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
