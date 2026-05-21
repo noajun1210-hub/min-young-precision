@@ -194,8 +194,8 @@ function AdminSection({
 }
 
 export default function Admin() {
-  const [repositoryOwner, setRepositoryOwner] = useState(githubContentConfig.owner);
-  const [repositoryName, setRepositoryName] = useState(githubContentConfig.repo);
+  const [repositoryOwner, setRepositoryOwner] = useState('');
+  const [repositoryName, setRepositoryName] = useState('');
   const [token, setToken] = useState(() => localStorage.getItem('minyoung_github_token') || '');
   const [rememberToken, setRememberToken] = useState(() => Boolean(localStorage.getItem('minyoung_github_token')));
   const [isAuthenticated, setIsAuthenticated] = useState(false);
