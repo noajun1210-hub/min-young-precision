@@ -2,6 +2,7 @@ const GITHUB_OWNER = 'noajun1210-hub';
 const GITHUB_REPO = 'min-young-precision';
 const GITHUB_BRANCH = 'main';
 const SITE_CONTENT_PATH = 'src/data/siteContent.json';
+const UPLOADS_DIRECTORY = 'public/uploads';
 
 type GitHubFileResponse = {
   name: string;
@@ -17,6 +18,13 @@ type GitHubUpdateResponse = {
     path: string;
     sha: string;
   };
+  commit: {
+    sha: string;
+    message: string;
+  };
+};
+
+type GitHubDeleteResponse = {
   commit: {
     sha: string;
     message: string;
@@ -49,6 +57,56 @@ function decodeBase64Unicode(value: string) {
   const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
 
   return new TextDecoder().decode(bytes);
+}
+
+function encodeArrayBufferToBase64(buffer: ArrayBuffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+
+  return btoa(binary);
+}
+
+function getSafeImageExtension(file: File) {
+  const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+
+  if (allowedExtensions.includes(extension)) {
+    return extension;
+  }
+
+  if (file.type === 'image/png') return 'png';
+  if (file.type === 'image/webp') return 'webp';
+  if (file.type === 'image/gif') return 'gif';
+
+  return 'jpg';
+}
+
+function makeHeroImageFileName(file: File) {
+  const extension = getSafeImageExtension(file);
+  return `hero-background-${Date.now()}.${extension}`;
+}
+
+function normalizePublicImagePath(publicPath: string) {
+  const trimmedPath = publicPath.trim();
+
+  if (!trimmedPath) {
+    throw new Error('삭제할 이미지 경로가 없습니다.');
+  }
+
+  if (trimmedPath.startsWith('https://') || trimmedPath.startsWith('http://')) {
+    const url = new URL(trimmedPath);
+    return `public${url.pathname}`;
+  }
+
+  if (trimmedPath.startsWith('/')) {
+    return `public${trimmedPath}`;
+  }
+
+  return `public/${trimmedPath}`;
 }
 
 async function githubRequest<T>(
@@ -131,9 +189,68 @@ export async function saveSiteContent(token: string, content: unknown) {
   );
 }
 
+export async function uploadHeroBackgroundImage(token: string, file: File) {
+  if (!file.type.startsWith('image/')) {
+    throw new Error('이미지 파일만 업로드할 수 있습니다.');
+  }
+
+  const maxSize = 5 * 1024 * 1024;
+
+  if (file.size > maxSize) {
+    throw new Error('이미지는 5MB 이하 파일만 업로드해주세요.');
+  }
+
+  const fileName = makeHeroImageFileName(file);
+  const githubPath = `${UPLOADS_DIRECTORY}/${fileName}`;
+  const publicPath = `/uploads/${fileName}`;
+  const buffer = await file.arrayBuffer();
+  const content = encodeArrayBufferToBase64(buffer);
+
+  await githubRequest<GitHubUpdateResponse>(
+    `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${githubPath}`,
+    token,
+    {
+      method: 'PUT',
+      body: JSON.stringify({
+        message: 'Upload hero background image',
+        content,
+        branch: GITHUB_BRANCH,
+      }),
+    }
+  );
+
+  return {
+    githubPath,
+    publicPath,
+  };
+}
+
+export async function deleteUploadedImage(token: string, publicPath: string) {
+  const githubPath = normalizePublicImagePath(publicPath);
+
+  const file = await githubRequest<GitHubFileResponse>(
+    `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${githubPath}?ref=${GITHUB_BRANCH}`,
+    token
+  );
+
+  return githubRequest<GitHubDeleteResponse>(
+    `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${githubPath}`,
+    token,
+    {
+      method: 'DELETE',
+      body: JSON.stringify({
+        message: 'Delete uploaded hero background image',
+        sha: file.sha,
+        branch: GITHUB_BRANCH,
+      }),
+    }
+  );
+}
+
 export const githubContentConfig = {
   owner: GITHUB_OWNER,
   repo: GITHUB_REPO,
   branch: GITHUB_BRANCH,
   path: SITE_CONTENT_PATH,
+  uploadsDirectory: UPLOADS_DIRECTORY,
 };
