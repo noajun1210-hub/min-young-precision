@@ -407,17 +407,18 @@ export default function Admin() {
     }
 
     const currentImages = content.about.images || [];
-    const remainingSlots = 3 - currentImages.length;
+    const aboutImageLimit = 10;
+    const remainingSlots = aboutImageLimit - currentImages.length;
 
     if (remainingSlots <= 0) {
-      setStatusMessage('error', '회사소개 이미지는 최대 3장까지 등록할 수 있습니다. 기존 이미지를 삭제한 뒤 다시 업로드해주세요.');
+      setStatusMessage('error', '회사소개 이미지는 최대 10장까지 등록할 수 있습니다. 기존 이미지를 삭제한 뒤 다시 업로드해주세요.');
       return;
     }
 
     if (selectedAboutImages.length > remainingSlots) {
       setStatusMessage(
         'error',
-        `회사소개 이미지는 최대 3장까지 등록할 수 있습니다. 현재 ${currentImages.length}장이 등록되어 있으므로 ${remainingSlots}장까지만 추가할 수 있습니다.`
+        `회사소개 이미지는 최대 10장까지 등록할 수 있습니다. 현재 ${currentImages.length}장이 등록되어 있으므로 ${remainingSlots}장까지만 추가할 수 있습니다.`
       );
       return;
     }
@@ -1040,7 +1041,7 @@ export default function Admin() {
 
             <AdminSection
               title="회사소개 슬라이드 이미지"
-              description="회사소개 오른쪽 영역에 표시될 이미지를 관리합니다. 최대 3장까지 등록할 수 있으며, 여러 장이면 자동으로 전환됩니다."
+              description="회사소개 오른쪽 영역에 표시될 이미지를 관리합니다. 최대 10장까지 등록할 수 있으며, 여러 장이면 자동으로 전환됩니다."
             >
               <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
@@ -1049,7 +1050,7 @@ export default function Admin() {
                     <div>
                       <h3 className="font-bold">회사소개 이미지 추가</h3>
                       <p className="mt-1 text-sm text-slate-500">
-                        JPG, PNG, WEBP, GIF 파일을 사용할 수 있습니다. 현재 {aboutImages.length}/3장 등록되어 있습니다.
+                        JPG, PNG, WEBP, GIF 파일을 사용할 수 있습니다. 현재 {aboutImages.length}/10장 등록되어 있습니다.
                       </p>
                     </div>
                   </div>
@@ -1084,7 +1085,7 @@ export default function Admin() {
                     <button
                       type="button"
                       onClick={handleAboutImageUpload}
-                      disabled={isBusy || selectedAboutImages.length === 0 || aboutImages.length >= 3}
+                      disabled={isBusy || selectedAboutImages.length === 0 || aboutImages.length >= 10}
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
