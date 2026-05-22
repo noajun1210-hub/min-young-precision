@@ -87,7 +87,7 @@ function getSafeImageExtension(file: File) {
 
 function makeHeroImageFileName(file: File) {
   const extension = getSafeImageExtension(file);
-  return `hero-background-${Date.now()}.${extension}`;
+  return `hero-slide-${Date.now()}.${extension}`;
 }
 
 function makeAboutImageFileName(file: File) {
@@ -258,6 +258,17 @@ export async function uploadHeroBackgroundImage(token: string, file: File) {
     file,
     fileName,
     'Upload hero background image'
+  );
+}
+
+export async function uploadHeroSlideImage(token: string, file: File) {
+  const fileName = makeHeroImageFileName(file);
+
+  return uploadImageToGitHub(
+    token,
+    file,
+    fileName,
+    'Upload hero slide image'
   );
 }
 
