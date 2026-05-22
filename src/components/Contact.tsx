@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone, UserRound } from 'lucide-react';
+import { Mail, MapPin, Phone, User } from 'lucide-react';
 import siteContent from '../data/siteContent.json';
 
 export default function Contact() {
@@ -22,7 +22,7 @@ export default function Contact() {
               <div className="mt-10 space-y-5">
                 <div className="flex items-start gap-4">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-600/20 text-blue-400">
-                    <UserRound size={20} />
+                    <User size={20} />
                   </div>
 
                   <div>
