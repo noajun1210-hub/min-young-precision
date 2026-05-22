@@ -90,6 +90,11 @@ function makeHeroImageFileName(file: File) {
   return `hero-background-${Date.now()}.${extension}`;
 }
 
+function makeAboutImageFileName(file: File) {
+  const extension = getSafeImageExtension(file);
+  return `about-slide-${Date.now()}.${extension}`;
+}
+
 function normalizePublicImagePath(publicPath: string) {
   const trimmedPath = publicPath.trim();
 
@@ -107,6 +112,18 @@ function normalizePublicImagePath(publicPath: string) {
   }
 
   return `public/${trimmedPath}`;
+}
+
+function validateImageFile(file: File) {
+  if (!file.type.startsWith('image/')) {
+    throw new Error('이미지 파일만 업로드할 수 있습니다.');
+  }
+
+  const maxSize = 5 * 1024 * 1024;
+
+  if (file.size > maxSize) {
+    throw new Error('이미지는 5MB 이하 파일만 업로드해주세요.');
+  }
 }
 
 async function githubRequest<T>(
@@ -152,6 +169,33 @@ async function githubRequest<T>(
   return response.json();
 }
 
+async function uploadImageToGitHub(token: string, file: File, fileName: string, commitMessage: string) {
+  validateImageFile(file);
+
+  const githubPath = `${UPLOADS_DIRECTORY}/${fileName}`;
+  const publicPath = `/uploads/${fileName}`;
+  const buffer = await file.arrayBuffer();
+  const content = encodeArrayBufferToBase64(buffer);
+
+  await githubRequest<GitHubUpdateResponse>(
+    `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${githubPath}`,
+    token,
+    {
+      method: 'PUT',
+      body: JSON.stringify({
+        message: commitMessage,
+        content,
+        branch: GITHUB_BRANCH,
+      }),
+    }
+  );
+
+  return {
+    githubPath,
+    publicPath,
+  };
+}
+
 export async function getSiteContentFile(token: string) {
   return githubRequest<GitHubFileResponse>(
     `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${SITE_CONTENT_PATH}?ref=${GITHUB_BRANCH}`,
@@ -190,39 +234,25 @@ export async function saveSiteContent(token: string, content: unknown) {
 }
 
 export async function uploadHeroBackgroundImage(token: string, file: File) {
-  if (!file.type.startsWith('image/')) {
-    throw new Error('이미지 파일만 업로드할 수 있습니다.');
-  }
-
-  const maxSize = 5 * 1024 * 1024;
-
-  if (file.size > maxSize) {
-    throw new Error('이미지는 5MB 이하 파일만 업로드해주세요.');
-  }
-
   const fileName = makeHeroImageFileName(file);
-  const githubPath = `${UPLOADS_DIRECTORY}/${fileName}`;
-  const publicPath = `/uploads/${fileName}`;
-  const buffer = await file.arrayBuffer();
-  const content = encodeArrayBufferToBase64(buffer);
 
-  await githubRequest<GitHubUpdateResponse>(
-    `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${githubPath}`,
+  return uploadImageToGitHub(
     token,
-    {
-      method: 'PUT',
-      body: JSON.stringify({
-        message: 'Upload hero background image',
-        content,
-        branch: GITHUB_BRANCH,
-      }),
-    }
+    file,
+    fileName,
+    'Upload hero background image'
   );
+}
 
-  return {
-    githubPath,
-    publicPath,
-  };
+export async function uploadAboutSlideImage(token: string, file: File) {
+  const fileName = makeAboutImageFileName(file);
+
+  return uploadImageToGitHub(
+    token,
+    file,
+    fileName,
+    'Upload about slide image'
+  );
 }
 
 export async function deleteUploadedImage(token: string, publicPath: string) {
@@ -239,7 +269,7 @@ export async function deleteUploadedImage(token: string, publicPath: string) {
     {
       method: 'DELETE',
       body: JSON.stringify({
-        message: 'Delete uploaded hero background image',
+        message: 'Delete uploaded image',
         sha: file.sha,
         branch: GITHUB_BRANCH,
       }),
