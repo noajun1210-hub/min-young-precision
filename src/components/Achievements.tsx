@@ -13,18 +13,18 @@ export default function Achievements() {
   );
 
   return (
-    <section id="achievements" className="py-24 bg-slate-50 border-t border-slate-100">
+    <section id="achievements" className="bg-slate-50 py-16 sm:py-20 lg:py-24 border-t border-slate-100">
       <div className="mx-auto w-full max-w-[1800px] px-4 sm:px-6 lg:px-10">
-        <div className="text-center mb-14">
-          <span className="text-brand-blue font-bold uppercase tracking-[0.35em] text-xs md:text-sm">
+        <div className="mb-12 text-center sm:mb-14">
+          <span className="text-xs font-black uppercase tracking-[0.32em] text-brand-blue sm:text-sm">
             CERTIFICATES & AWARDS
           </span>
 
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mt-3">
+          <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl lg:text-5xl">
             기술력과 신뢰를 증명하는 자료
           </h2>
 
-          <p className="mt-5 max-w-3xl mx-auto text-slate-600 leading-relaxed">
+          <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-slate-600 sm:text-lg">
             민영정밀의 특허, 기술등록, 인증, 상패 및 주요 성과 자료를 한눈에 확인하실 수 있습니다.
           </p>
         </div>
@@ -32,7 +32,7 @@ export default function Achievements() {
         {allImages.length > 0 ? (
           <div className="relative">
             <div
-              className={`flex snap-x snap-mandatory gap-8 overflow-x-auto pb-8 ${
+              className={`flex snap-x snap-mandatory gap-5 overflow-x-auto pb-7 sm:gap-8 ${
                 allImages.length === 1 ? 'justify-center' : ''
               }`}
             >
@@ -43,7 +43,7 @@ export default function Achievements() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={`${item.category} 이미지 ${index + 1} 크게 보기`}
-                  className="group block w-[86vw] max-w-[620px] shrink-0 snap-center sm:w-[520px] lg:w-[560px] xl:w-[600px]"
+                  className="group block w-[84vw] max-w-[600px] shrink-0 snap-center sm:w-[480px] lg:w-[540px] xl:w-[600px]"
                 >
                   <img
                     src={item.image}
@@ -61,7 +61,7 @@ export default function Achievements() {
             )}
           </div>
         ) : (
-          <div className="flex min-h-[360px] items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white text-center">
+          <div className="flex min-h-[320px] items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white text-center sm:min-h-[360px]">
             <div className="px-6">
               <ImageIcon size={44} className="mx-auto text-slate-400" />
 
