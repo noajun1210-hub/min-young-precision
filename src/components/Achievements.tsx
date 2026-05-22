@@ -17,7 +17,7 @@ export default function Achievements() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
           <span className="text-brand-blue font-bold uppercase tracking-[0.35em] text-xs md:text-sm">
-            Professional Proof
+            CERTIFICATES & AWARDS
           </span>
 
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mt-3">
@@ -30,36 +30,46 @@ export default function Achievements() {
         </div>
 
         {allImages.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {allImages.map((item, index) => (
-              <a
-                key={`${item.image}-${index}`}
-                href={item.image}
-                target="_blank"
-                rel="noreferrer"
-                className="group block text-center"
-              >
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl">
-                  <div className="aspect-[3/4] bg-white p-4">
+          <div className="relative">
+            <div
+              className={`flex gap-8 overflow-x-auto pb-6 ${
+                allImages.length <= 4 ? 'lg:justify-center' : 'lg:justify-start'
+              }`}
+            >
+              {allImages.map((item, index) => (
+                <a
+                  key={`${item.image}-${index}`}
+                  href={item.image}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group block min-w-[260px] max-w-[260px] text-center sm:min-w-[280px] sm:max-w-[280px] lg:min-w-[292px] lg:max-w-[292px]"
+                >
+                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl">
                     <img
                       src={item.image}
                       alt={`${item.category} 이미지 ${index + 1}`}
-                      className="h-full w-full object-contain"
+                      className="block w-full object-contain"
                     />
                   </div>
-                </div>
 
-                <div className="mt-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-brand-blue">
-                    {item.category}
-                  </p>
+                  <div className="mt-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-brand-blue">
+                      {item.category}
+                    </p>
 
-                  <p className="mt-1 text-sm font-bold text-slate-700">
-                    {item.title}
-                  </p>
-                </div>
-              </a>
-            ))}
+                    <p className="mt-1 text-sm font-bold text-slate-700">
+                      {item.title}
+                    </p>
+                  </div>
+                </a>
+              ))}
+            </div>
+
+            {allImages.length > 4 && (
+              <p className="mt-2 text-center text-xs font-medium text-slate-400">
+                좌우로 스크롤하여 모든 자료를 확인할 수 있습니다.
+              </p>
+            )}
           </div>
         ) : (
           <div className="flex min-h-[320px] items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white text-center">
