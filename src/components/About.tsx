@@ -23,8 +23,6 @@ export default function About() {
     }
   }, [currentImageIndex, images.length]);
 
-  const currentImage = images[currentImageIndex];
-
   return (
     <section id="about" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -101,17 +99,6 @@ export default function About() {
                     </div>
                   )}
                 </div>
-
-                {currentImage && (
-                  <div className="border-t border-slate-200 bg-white px-5 py-4">
-                    <p className="text-sm font-bold text-slate-900">
-                      민영정밀 현장 및 주요 자료
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      이미지 전체가 보이도록 표시하고, 남는 공간은 같은 이미지를 흐림 배경으로 채워 자연스럽게 보이도록 처리했습니다.
-                    </p>
-                  </div>
-                )}
               </div>
             ) : (
               <div className="relative bg-brand-dark aspect-video rounded-xl shadow-2xl flex items-center justify-center p-8 overflow-hidden">
