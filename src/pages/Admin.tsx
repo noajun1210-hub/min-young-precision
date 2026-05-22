@@ -236,7 +236,8 @@ export default function Admin() {
   const [status, setStatus] = useState<StatusType>('idle');
   const [message, setMessage] = useState('');
   const [selectedHeroImage, setSelectedHeroImage] = useState<File | null>(null);
-  const [selectedAboutImage, setSelectedAboutImage] = useState<File | null>(null);
+  const [selectedAboutImages, setSelectedAboutImages] = useState<File[]>([]);
+  const [aboutImagePreviewUrls, setAboutImagePreviewUrls] = useState<Record<string, string>>({});
   const [selectedAchievementImage, setSelectedAchievementImage] = useState<File | null>(null);
   const [selectedAchievementTabId, setSelectedAchievementTabId] = useState('patents');
 
@@ -400,36 +401,59 @@ export default function Admin() {
       return;
     }
 
-    if (!selectedAboutImage) {
+    if (selectedAboutImages.length === 0) {
       setStatusMessage('error', '업로드할 회사소개 이미지를 선택해주세요.');
       return;
     }
 
     const currentImages = content.about.images || [];
+    const remainingSlots = 3 - currentImages.length;
 
-    if (currentImages.length >= 3) {
+    if (remainingSlots <= 0) {
       setStatusMessage('error', '회사소개 이미지는 최대 3장까지 등록할 수 있습니다. 기존 이미지를 삭제한 뒤 다시 업로드해주세요.');
+      return;
+    }
+
+    if (selectedAboutImages.length > remainingSlots) {
+      setStatusMessage(
+        'error',
+        `회사소개 이미지는 최대 3장까지 등록할 수 있습니다. 현재 ${currentImages.length}장이 등록되어 있으므로 ${remainingSlots}장까지만 추가할 수 있습니다.`
+      );
       return;
     }
 
     try {
       setStatusMessage('loading', '회사소개 이미지를 GitHub에 업로드하는 중입니다.');
 
-      const uploadedImage = await uploadAboutSlideImage(token, selectedAboutImage);
+      const uploadedImagePaths: string[] = [];
+      const nextPreviewUrls: Record<string, string> = {};
+
+      for (const file of selectedAboutImages) {
+        const uploadedImage = await uploadAboutSlideImage(token, file);
+        uploadedImagePaths.push(uploadedImage.publicPath);
+        nextPreviewUrls[uploadedImage.publicPath] = URL.createObjectURL(file);
+      }
 
       const nextContent: SiteContent = {
         ...content,
         about: {
           ...content.about,
-          images: [...currentImages, uploadedImage.publicPath],
+          images: [...currentImages, ...uploadedImagePaths],
         },
       };
 
       await saveSiteContent(token, nextContent);
 
       setContent(nextContent);
-      setSelectedAboutImage(null);
-      setStatusMessage('success', '회사소개 이미지가 추가되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+      setSelectedAboutImages([]);
+      setAboutImagePreviewUrls((prev) => ({
+        ...prev,
+        ...nextPreviewUrls,
+      }));
+      setStatusMessage(
+        'success',
+        '회사소개 이미지가 추가되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다. 배포 완료 전에도 관리자 화면에서는 미리보기가 표시됩니다.'
+      );
     } catch (error) {
       setStatusMessage('error', error instanceof Error ? error.message : '회사소개 이미지 업로드에 실패했습니다.');
     }
@@ -457,6 +481,11 @@ export default function Admin() {
       await saveSiteContent(token, nextContent);
 
       setContent(nextContent);
+      setAboutImagePreviewUrls((prev) => {
+        const nextPreviewUrls = { ...prev };
+        delete nextPreviewUrls[imagePath];
+        return nextPreviewUrls;
+      });
       setStatusMessage('success', '회사소개 이미지가 삭제되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
     } catch (error) {
       setStatusMessage('error', error instanceof Error ? error.message : '회사소개 이미지 삭제에 실패했습니다.');
@@ -554,7 +583,8 @@ export default function Admin() {
     setStatus('idle');
     setMessage('');
     setSelectedHeroImage(null);
-    setSelectedAboutImage(null);
+    setSelectedAboutImages([]);
+    setAboutImagePreviewUrls({});
     setSelectedAchievementImage(null);
 
     if (!rememberToken) {
@@ -1028,14 +1058,25 @@ export default function Admin() {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(event) => setSelectedAboutImage(event.target.files?.[0] || null)}
+                      multiple
+                      onChange={(event) => setSelectedAboutImages(Array.from(event.target.files || []))}
                       className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-slate-800"
                     />
 
-                    {selectedAboutImage && (
-                      <p className="mt-3 text-sm text-slate-600">
-                        선택된 파일: <strong>{selectedAboutImage.name}</strong>
-                      </p>
+                    {selectedAboutImages.length > 0 && (
+                      <div className="mt-3 rounded-xl bg-white p-3 text-sm text-slate-600">
+                        <p className="font-bold text-slate-800">
+                          선택된 파일 {selectedAboutImages.length}개
+                        </p>
+
+                        <ul className="mt-2 space-y-1">
+                          {selectedAboutImages.map((file, index) => (
+                            <li key={`${file.name}-${index}`} className="break-all text-xs text-slate-500">
+                              {index + 1}. {file.name}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
                   </div>
 
@@ -1043,7 +1084,7 @@ export default function Admin() {
                     <button
                       type="button"
                       onClick={handleAboutImageUpload}
-                      disabled={isBusy || !selectedAboutImage || aboutImages.length >= 3}
+                      disabled={isBusy || selectedAboutImages.length === 0 || aboutImages.length >= 3}
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
@@ -1060,9 +1101,13 @@ export default function Admin() {
                       {aboutImages.map((image, index) => (
                         <div key={`${image}-${index}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
                           <img
-                            src={image}
+                            src={aboutImagePreviewUrls[image] || image}
                             alt={`회사소개 이미지 ${index + 1}`}
                             className="h-40 w-full object-cover"
+                            onError={(event) => {
+                              event.currentTarget.src =
+                                'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360"><rect width="640" height="360" fill="%23f1f5f9"/><text x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%2364758b" font-family="Arial" font-size="18">배포 완료 후 이미지가 표시됩니다</text></svg>';
+                            }}
                           />
 
                           <div className="space-y-3 border-t border-slate-200 p-4">
