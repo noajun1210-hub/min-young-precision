@@ -12,18 +12,9 @@ export default function Achievements() {
     }))
   );
 
-  const galleryGridClass =
-    allImages.length === 1
-      ? 'grid grid-cols-1 justify-items-center'
-      : allImages.length === 2
-        ? 'grid grid-cols-1 gap-10 sm:grid-cols-2'
-        : allImages.length === 3
-          ? 'grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3'
-          : 'grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4';
-
   return (
     <section id="achievements" className="py-24 bg-slate-50 border-t border-slate-100">
-      <div className="mx-auto max-w-[1520px] px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1800px] px-4 sm:px-6 lg:px-10">
         <div className="text-center mb-14">
           <span className="text-brand-blue font-bold uppercase tracking-[0.35em] text-xs md:text-sm">
             CERTIFICATES & AWARDS
@@ -39,25 +30,35 @@ export default function Achievements() {
         </div>
 
         {allImages.length > 0 ? (
-          <div className={galleryGridClass}>
-            {allImages.map((item, index) => (
-              <a
-                key={`${item.image}-${index}`}
-                href={item.image}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`${item.category} 이미지 ${index + 1} 크게 보기`}
-                className={`group block w-full ${
-                  allImages.length === 1 ? 'max-w-[560px]' : ''
-                }`}
-              >
-                <img
-                  src={item.image}
-                  alt={`${item.category} 이미지 ${index + 1}`}
-                  className="block w-full rounded-2xl border border-slate-200 bg-white object-contain shadow-md transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl"
-                />
-              </a>
-            ))}
+          <div className="relative">
+            <div
+              className={`flex snap-x snap-mandatory gap-8 overflow-x-auto pb-8 ${
+                allImages.length === 1 ? 'justify-center' : ''
+              }`}
+            >
+              {allImages.map((item, index) => (
+                <a
+                  key={`${item.image}-${index}`}
+                  href={item.image}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`${item.category} 이미지 ${index + 1} 크게 보기`}
+                  className="group block w-[86vw] max-w-[620px] shrink-0 snap-center sm:w-[520px] lg:w-[560px] xl:w-[600px]"
+                >
+                  <img
+                    src={item.image}
+                    alt={`${item.category} 이미지 ${index + 1}`}
+                    className="block h-auto w-full rounded-2xl border border-slate-200 bg-white shadow-lg transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl"
+                  />
+                </a>
+              ))}
+            </div>
+
+            {allImages.length > 1 && (
+              <p className="mt-1 text-center text-xs font-medium text-slate-400">
+                좌우로 스크롤하면 모든 자료를 크게 확인할 수 있습니다.
+              </p>
+            )}
           </div>
         ) : (
           <div className="flex min-h-[360px] items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-white text-center">
