@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Award, FileCheck2, Images, ShieldCheck } from 'lucide-react';
+import { Award, FileCheck2, Image as ImageIcon, ShieldCheck } from 'lucide-react';
 import siteContent from '../data/siteContent.json';
 
 export default function Achievements() {
@@ -51,7 +51,7 @@ export default function Achievements() {
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              {tabIconMap[tab.id as keyof typeof tabIconMap] || <Images size={18} />}
+              {tabIconMap[tab.id as keyof typeof tabIconMap] || <ImageIcon size={18} />}
               {tab.label}
             </button>
           ))}
@@ -61,7 +61,7 @@ export default function Achievements() {
           <div className="grid lg:grid-cols-[0.8fr_1.2fr] gap-10 items-start">
             <div>
               <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-blue/10 text-brand-blue mb-6">
-                {tabIconMap[activeTab.id as keyof typeof tabIconMap] || <Images size={24} />}
+                {tabIconMap[activeTab.id as keyof typeof tabIconMap] || <ImageIcon size={24} />}
               </div>
 
               <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
@@ -101,7 +101,7 @@ export default function Achievements() {
                         {activeTab.label} 자료 {index + 1}
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
-                        클릭 시 이미지 자료를 확인할 수 있습니다.
+                        등록된 이미지 자료입니다.
                       </p>
                     </div>
                   </button>
@@ -110,7 +110,7 @@ export default function Achievements() {
             ) : (
               <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white text-center">
                 <div className="px-6">
-                  <Images size={42} className="mx-auto text-slate-400" />
+                  <ImageIcon size={42} className="mx-auto text-slate-400" />
                   <p className="mt-4 text-lg font-bold text-slate-800">
                     아직 등록된 이미지가 없습니다.
                   </p>
