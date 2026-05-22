@@ -85,9 +85,7 @@
         "label": "인증 · 상패",
         "title": "품질과 신뢰의 결과",
         "description": "품질 향상과 기술 경쟁력을 바탕으로 인정받은 인증, 상패 및 관련 자료를 소개합니다.",
-        "images": [
-          "/uploads/achievement-awards-1779435669982.jpg"
-        ]
+        "images": []
       },
       {
         "id": "records",
