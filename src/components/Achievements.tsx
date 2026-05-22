@@ -48,18 +48,14 @@ export default function Achievements() {
                 rel="noreferrer"
                 aria-label={`${item.category} 이미지 ${index + 1} 크게 보기`}
                 className={`group block w-full ${
-                  allImages.length === 1 ? 'max-w-[520px]' : ''
+                  allImages.length === 1 ? 'max-w-[560px]' : ''
                 }`}
               >
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl">
-                  <div className="flex h-[520px] items-center justify-center bg-white p-2 sm:h-[560px] lg:h-[600px]">
-                    <img
-                      src={item.image}
-                      alt={`${item.category} 이미지 ${index + 1}`}
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                </div>
+                <img
+                  src={item.image}
+                  alt={`${item.category} 이미지 ${index + 1}`}
+                  className="block w-full rounded-2xl border border-slate-200 bg-white object-contain shadow-md transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl"
+                />
               </a>
             ))}
           </div>
