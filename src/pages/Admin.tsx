@@ -27,7 +27,7 @@ import {
   saveSiteContent,
   uploadAboutSlideImage,
   uploadAchievementImage,
-  uploadHeroBackgroundImage,
+  uploadHeroSlideImage,
   uploadServiceSlideImage,
 } from '../lib/githubContent';
 
@@ -54,6 +54,8 @@ type HeroContent = {
   highlight: string;
   description: string;
   backgroundImage: string;
+  backgroundImages?: string[];
+  slideIntervalMs?: number;
   primaryButton: {
     label: string;
     href: string;
@@ -156,6 +158,7 @@ type SiteContent = {
 
 type StatusType = 'idle' | 'loading' | 'success' | 'error';
 
+const MAX_HERO_IMAGES = 10;
 const MAX_ABOUT_IMAGES = 10;
 const MAX_SERVICE_IMAGES = 10;
 
@@ -245,6 +248,14 @@ function EmptyImageBox({ text, subText }: { text: string; subText: string }) {
   );
 }
 
+function ImageErrorFallback() {
+  return (
+    <div className="flex h-40 items-center justify-center bg-slate-100 px-4 text-center text-xs font-bold text-slate-400">
+      ë°°í¬ ìë£ í ì´ë¯¸ì§ê° íìë©ëë¤.
+    </div>
+  );
+}
+
 export default function Admin() {
   const [repositoryOwner, setRepositoryOwner] = useState('');
   const [repositoryName, setRepositoryName] = useState('');
@@ -254,11 +265,16 @@ export default function Admin() {
   const [content, setContent] = useState<SiteContent | null>(null);
   const [status, setStatus] = useState<StatusType>('idle');
   const [message, setMessage] = useState('');
-  const [selectedHeroImage, setSelectedHeroImage] = useState<File | null>(null);
+
+  const [selectedHeroImages, setSelectedHeroImages] = useState<File[]>([]);
+  const [heroImagePreviewUrls, setHeroImagePreviewUrls] = useState<Record<string, string>>({});
+
   const [selectedAboutImages, setSelectedAboutImages] = useState<File[]>([]);
   const [aboutImagePreviewUrls, setAboutImagePreviewUrls] = useState<Record<string, string>>({});
+
   const [selectedServiceImages, setSelectedServiceImages] = useState<File[]>([]);
   const [serviceImagePreviewUrls, setServiceImagePreviewUrls] = useState<Record<string, string>>({});
+
   const [selectedAchievementImages, setSelectedAchievementImages] = useState<File[]>([]);
   const [achievementImagePreviewUrls, setAchievementImagePreviewUrls] = useState<Record<string, string>>({});
   const [selectedAchievementTabId, setSelectedAchievementTabId] = useState('patents');
@@ -268,6 +284,14 @@ export default function Admin() {
   const repositoryLabel = useMemo(() => {
     return `${githubContentConfig.owner}/${githubContentConfig.repo}`;
   }, []);
+
+  const heroImages = content
+    ? ((content.hero.backgroundImages && content.hero.backgroundImages.length > 0)
+        ? content.hero.backgroundImages
+        : content.hero.backgroundImage
+          ? [content.hero.backgroundImage]
+          : [])
+    : [];
 
   const aboutImages = content?.about.images || [];
   const serviceImages = content?.services.images || [];
@@ -285,15 +309,15 @@ export default function Admin() {
 
   function validateLoginInfo() {
     if (repositoryOwner.trim() !== githubContentConfig.owner) {
-      throw new Error(`Repository Owner는 ${githubContentConfig.owner}로 입력해주세요.`);
+      throw new Error(`Repository Ownerë ${githubContentConfig.owner}ë¡ ìë ¥í´ì£¼ì¸ì.`);
     }
 
     if (repositoryName.trim() !== githubContentConfig.repo) {
-      throw new Error(`Repository Name은 ${githubContentConfig.repo}로 입력해주세요.`);
+      throw new Error(`Repository Nameì ${githubContentConfig.repo}ë¡ ìë ¥í´ì£¼ì¸ì.`);
     }
 
     if (!token.trim()) {
-      throw new Error('GitHub Personal Access Token을 입력해주세요.');
+      throw new Error('GitHub Personal Access Tokenì ìë ¥í´ì£¼ì¸ì.');
     }
   }
 
@@ -301,7 +325,7 @@ export default function Admin() {
     try {
       validateLoginInfo();
 
-      setStatusMessage('loading', 'GitHub 저장소에 접속하는 중입니다.');
+      setStatusMessage('loading', 'GitHub ì ì¥ìì ì ìíë ì¤ìëë¤.');
 
       if (rememberToken) {
         localStorage.setItem('minyoung_github_token', token.trim());
@@ -315,119 +339,145 @@ export default function Admin() {
       setContent(loadedContent);
       setSelectedAchievementTabId(loadedContent.achievements?.tabs?.[0]?.id || 'patents');
       setIsAuthenticated(true);
-      setStatusMessage('success', '관리자 페이지 접속이 완료되었습니다.');
+      setStatusMessage('success', 'ê´ë¦¬ì íì´ì§ ì ìì´ ìë£ëììµëë¤.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : '접속하지 못했습니다.');
+      setStatusMessage('error', error instanceof Error ? error.message : 'ì ìíì§ ëª»íìµëë¤.');
     }
   }
 
   async function handleLoad() {
     try {
-      setStatusMessage('loading', 'GitHub에서 홈페이지 데이터를 다시 불러오는 중입니다.');
+      setStatusMessage('loading', 'GitHubìì ííì´ì§ ë°ì´í°ë¥¼ ë¤ì ë¶ë¬ì¤ë ì¤ìëë¤.');
 
       const result = await loadSiteContent(token);
       const loadedContent = result.content as SiteContent;
 
       setContent(loadedContent);
       setSelectedAchievementTabId(loadedContent.achievements?.tabs?.[0]?.id || 'patents');
-      setStatusMessage('success', '홈페이지 데이터를 다시 불러왔습니다.');
+      setStatusMessage('success', 'ííì´ì§ ë°ì´í°ë¥¼ ë¤ì ë¶ë¬ììµëë¤.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : '데이터를 불러오지 못했습니다.');
+      setStatusMessage('error', error instanceof Error ? error.message : 'ë°ì´í°ë¥¼ ë¶ë¬ì¤ì§ ëª»íìµëë¤.');
     }
   }
 
   async function handleSave() {
     if (!content) {
-      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
       return;
     }
 
     try {
-      setStatusMessage('loading', '수정 내용을 GitHub에 저장하는 중입니다.');
+      setStatusMessage('loading', 'ìì  ë´ì©ì GitHubì ì ì¥íë ì¤ìëë¤.');
 
       await saveSiteContent(token, content);
-      setStatusMessage('success', '저장 완료! Cloudflare Pages가 자동으로 다시 배포됩니다. 보통 1~2분 정도 걸립니다.');
+      setStatusMessage('success', 'ì ì¥ ìë£! Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤. ë³´íµ 1~2ë¶ ì ë ê±¸ë¦½ëë¤.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : '저장하지 못했습니다.');
+      setStatusMessage('error', error instanceof Error ? error.message : 'ì ì¥íì§ ëª»íìµëë¤.');
     }
   }
 
   async function handleHeroImageUpload() {
     if (!content) {
-      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
       return;
     }
 
-    if (!selectedHeroImage) {
-      setStatusMessage('error', '업로드할 이미지를 선택해주세요.');
+    if (selectedHeroImages.length === 0) {
+      setStatusMessage('error', 'ìë¡ëí  ë©ì¸ ëí ì´ë¯¸ì§ë¥¼ ì íí´ì£¼ì¸ì.');
+      return;
+    }
+
+    if (heroImages.length + selectedHeroImages.length > MAX_HERO_IMAGES) {
+      setStatusMessage(
+        'error',
+        `ë©ì¸ ëí ì´ë¯¸ì§ë ìµë ${MAX_HERO_IMAGES}ì¥ê¹ì§ ë±ë¡í  ì ììµëë¤. íì¬ ${heroImages.length}ì¥ì´ ë±ë¡ëì´ ìì¼ë¯ë¡ ${MAX_HERO_IMAGES - heroImages.length}ì¥ê¹ì§ë§ ì¶ê°í  ì ììµëë¤.`
+      );
       return;
     }
 
     try {
-      setStatusMessage('loading', '메인 배경 이미지를 GitHub에 업로드하는 중입니다.');
+      setStatusMessage('loading', 'ë©ì¸ ëí ì´ë¯¸ì§ë¥¼ GitHubì ìë¡ëíë ì¤ìëë¤.');
 
-      const uploadedImage = await uploadHeroBackgroundImage(token, selectedHeroImage);
+      const uploadedImagePaths: string[] = [];
+      const nextPreviewUrls: Record<string, string> = {};
+
+      for (const file of selectedHeroImages) {
+        const uploadedImage = await uploadHeroSlideImage(token, file);
+        uploadedImagePaths.push(uploadedImage.publicPath);
+        nextPreviewUrls[uploadedImage.publicPath] = URL.createObjectURL(file);
+      }
+
+      const nextHeroImages = [...heroImages, ...uploadedImagePaths];
 
       const nextContent: SiteContent = {
         ...content,
         hero: {
           ...content.hero,
-          backgroundImage: uploadedImage.publicPath,
+          backgroundImage: nextHeroImages[0] || '',
+          backgroundImages: nextHeroImages,
+          slideIntervalMs: content.hero.slideIntervalMs || 4500,
         },
       };
 
       await saveSiteContent(token, nextContent);
 
       setContent(nextContent);
-      setSelectedHeroImage(null);
-      setStatusMessage('success', '메인 배경 이미지가 업로드되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+      setSelectedHeroImages([]);
+      setHeroImagePreviewUrls((prev) => ({
+        ...prev,
+        ...nextPreviewUrls,
+      }));
+      setStatusMessage('success', 'ë©ì¸ ëí ì´ë¯¸ì§ê° ì¶ê°ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.');
+      setStatusMessage('error', error instanceof Error ? error.message : 'ë©ì¸ ëí ì´ë¯¸ì§ ìë¡ëì ì¤í¨íìµëë¤.');
     }
   }
 
-  async function handleHeroImageDelete() {
+  async function handleHeroImageDelete(imagePath: string) {
     if (!content) {
-      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
-      return;
-    }
-
-    if (!content.hero.backgroundImage) {
-      setStatusMessage('error', '삭제할 메인 배경 이미지가 없습니다.');
+      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
       return;
     }
 
     try {
-      setStatusMessage('loading', '메인 배경 이미지를 삭제하는 중입니다.');
+      setStatusMessage('loading', 'ë©ì¸ ëí ì´ë¯¸ì§ë¥¼ ì­ì íë ì¤ìëë¤.');
 
-      await deleteUploadedImage(token, content.hero.backgroundImage);
+      await deleteUploadedImage(token, imagePath);
+
+      const nextHeroImages = heroImages.filter((image) => image !== imagePath);
 
       const nextContent: SiteContent = {
         ...content,
         hero: {
           ...content.hero,
-          backgroundImage: '',
+          backgroundImage: nextHeroImages[0] || '',
+          backgroundImages: nextHeroImages,
+          slideIntervalMs: content.hero.slideIntervalMs || 4500,
         },
       };
 
       await saveSiteContent(token, nextContent);
 
       setContent(nextContent);
-      setSelectedHeroImage(null);
-      setStatusMessage('success', '메인 배경 이미지가 삭제되었습니다. 기본 배경으로 돌아갑니다.');
+      setHeroImagePreviewUrls((prev) => {
+        const nextPreviewUrls = { ...prev };
+        delete nextPreviewUrls[imagePath];
+        return nextPreviewUrls;
+      });
+      setStatusMessage('success', 'ë©ì¸ ëí ì´ë¯¸ì§ê° ì­ì ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : '이미지 삭제에 실패했습니다.');
+      setStatusMessage('error', error instanceof Error ? error.message : 'ë©ì¸ ëí ì´ë¯¸ì§ ì­ì ì ì¤í¨íìµëë¤.');
     }
   }
 
   async function handleAboutImageUpload() {
     if (!content) {
-      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
       return;
     }
 
     if (selectedAboutImages.length === 0) {
-      setStatusMessage('error', '업로드할 회사소개 이미지를 선택해주세요.');
+      setStatusMessage('error', 'ìë¡ëí  íì¬ìê° ì´ë¯¸ì§ë¥¼ ì íí´ì£¼ì¸ì.');
       return;
     }
 
@@ -436,13 +486,13 @@ export default function Admin() {
     if (currentImages.length + selectedAboutImages.length > MAX_ABOUT_IMAGES) {
       setStatusMessage(
         'error',
-        `회사소개 이미지는 최대 ${MAX_ABOUT_IMAGES}장까지 등록할 수 있습니다. 현재 ${currentImages.length}장이 등록되어 있으므로 ${MAX_ABOUT_IMAGES - currentImages.length}장까지만 추가할 수 있습니다.`
+        `íì¬ìê° ì´ë¯¸ì§ë ìµë ${MAX_ABOUT_IMAGES}ì¥ê¹ì§ ë±ë¡í  ì ììµëë¤. íì¬ ${currentImages.length}ì¥ì´ ë±ë¡ëì´ ìì¼ë¯ë¡ ${MAX_ABOUT_IMAGES - currentImages.length}ì¥ê¹ì§ë§ ì¶ê°í  ì ììµëë¤.`
       );
       return;
     }
 
     try {
-      setStatusMessage('loading', '회사소개 이미지를 GitHub에 업로드하는 중입니다.');
+      setStatusMessage('loading', 'íì¬ìê° ì´ë¯¸ì§ë¥¼ GitHubì ìë¡ëíë ì¤ìëë¤.');
 
       const uploadedImagePaths: string[] = [];
       const nextPreviewUrls: Record<string, string> = {};
@@ -469,20 +519,20 @@ export default function Admin() {
         ...prev,
         ...nextPreviewUrls,
       }));
-      setStatusMessage('success', '회사소개 이미지가 추가되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+      setStatusMessage('success', 'íì¬ìê° ì´ë¯¸ì§ê° ì¶ê°ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : '회사소개 이미지 업로드에 실패했습니다.');
+      setStatusMessage('error', error instanceof Error ? error.message : 'íì¬ìê° ì´ë¯¸ì§ ìë¡ëì ì¤í¨íìµëë¤.');
     }
   }
 
   async function handleAboutImageDelete(imagePath: string) {
     if (!content) {
-      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
       return;
     }
 
     try {
-      setStatusMessage('loading', '회사소개 이미지를 삭제하는 중입니다.');
+      setStatusMessage('loading', 'íì¬ìê° ì´ë¯¸ì§ë¥¼ ì­ì íë ì¤ìëë¤.');
 
       await deleteUploadedImage(token, imagePath);
 
@@ -502,20 +552,20 @@ export default function Admin() {
         delete nextPreviewUrls[imagePath];
         return nextPreviewUrls;
       });
-      setStatusMessage('success', '회사소개 이미지가 삭제되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+      setStatusMessage('success', 'íì¬ìê° ì´ë¯¸ì§ê° ì­ì ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : '회사소개 이미지 삭제에 실패했습니다.');
+      setStatusMessage('error', error instanceof Error ? error.message : 'íì¬ìê° ì´ë¯¸ì§ ì­ì ì ì¤í¨íìµëë¤.');
     }
   }
 
   async function handleServiceImageUpload() {
     if (!content) {
-      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
       return;
     }
 
     if (selectedServiceImages.length === 0) {
-      setStatusMessage('error', '업로드할 사업 분야 이미지를 선택해주세요.');
+      setStatusMessage('error', 'ìë¡ëí  ì¬ì ë¶ì¼ ì´ë¯¸ì§ë¥¼ ì íí´ì£¼ì¸ì.');
       return;
     }
 
@@ -524,13 +574,13 @@ export default function Admin() {
     if (currentImages.length + selectedServiceImages.length > MAX_SERVICE_IMAGES) {
       setStatusMessage(
         'error',
-        `사업 분야 이미지는 최대 ${MAX_SERVICE_IMAGES}장까지 등록할 수 있습니다. 현재 ${currentImages.length}장이 등록되어 있으므로 ${MAX_SERVICE_IMAGES - currentImages.length}장까지만 추가할 수 있습니다.`
+        `ì¬ì ë¶ì¼ ì´ë¯¸ì§ë ìµë ${MAX_SERVICE_IMAGES}ì¥ê¹ì§ ë±ë¡í  ì ììµëë¤. íì¬ ${currentImages.length}ì¥ì´ ë±ë¡ëì´ ìì¼ë¯ë¡ ${MAX_SERVICE_IMAGES - currentImages.length}ì¥ê¹ì§ë§ ì¶ê°í  ì ììµëë¤.`
       );
       return;
     }
 
     try {
-      setStatusMessage('loading', '사업 분야 이미지를 GitHub에 업로드하는 중입니다.');
+      setStatusMessage('loading', 'ì¬ì ë¶ì¼ ì´ë¯¸ì§ë¥¼ GitHubì ìë¡ëíë ì¤ìëë¤.');
 
       const uploadedImagePaths: string[] = [];
       const nextPreviewUrls: Record<string, string> = {};
@@ -558,20 +608,20 @@ export default function Admin() {
         ...prev,
         ...nextPreviewUrls,
       }));
-      setStatusMessage('success', '사업 분야 이미지가 추가되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+      setStatusMessage('success', 'ì¬ì ë¶ì¼ ì´ë¯¸ì§ê° ì¶ê°ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : '사업 분야 이미지 업로드에 실패했습니다.');
+      setStatusMessage('error', error instanceof Error ? error.message : 'ì¬ì ë¶ì¼ ì´ë¯¸ì§ ìë¡ëì ì¤í¨íìµëë¤.');
     }
   }
 
   async function handleServiceImageDelete(imagePath: string) {
     if (!content) {
-      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
       return;
     }
 
     try {
-      setStatusMessage('loading', '사업 분야 이미지를 삭제하는 중입니다.');
+      setStatusMessage('loading', 'ì¬ì ë¶ì¼ ì´ë¯¸ì§ë¥¼ ì­ì íë ì¤ìëë¤.');
 
       await deleteUploadedImage(token, imagePath);
 
@@ -580,6 +630,7 @@ export default function Admin() {
         services: {
           ...content.services,
           images: (content.services.images || []).filter((image) => image !== imagePath),
+          slideIntervalMs: content.services.slideIntervalMs || 4000,
         },
       };
 
@@ -591,30 +642,30 @@ export default function Admin() {
         delete nextPreviewUrls[imagePath];
         return nextPreviewUrls;
       });
-      setStatusMessage('success', '사업 분야 이미지가 삭제되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+      setStatusMessage('success', 'ì¬ì ë¶ì¼ ì´ë¯¸ì§ê° ì­ì ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : '사업 분야 이미지 삭제에 실패했습니다.');
+      setStatusMessage('error', error instanceof Error ? error.message : 'ì¬ì ë¶ì¼ ì´ë¯¸ì§ ì­ì ì ì¤í¨íìµëë¤.');
     }
   }
 
   async function handleAchievementImageUpload() {
     if (!content) {
-      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
       return;
     }
 
     if (!activeAchievementTab) {
-      setStatusMessage('error', '이미지를 등록할 분류를 찾을 수 없습니다.');
+      setStatusMessage('error', 'ì´ë¯¸ì§ë¥¼ ë±ë¡í  ë¶ë¥ë¥¼ ì°¾ì ì ììµëë¤.');
       return;
     }
 
     if (selectedAchievementImages.length === 0) {
-      setStatusMessage('error', '업로드할 인증 자료 이미지를 선택해주세요.');
+      setStatusMessage('error', 'ìë¡ëí  ì¸ì¦ ìë£ ì´ë¯¸ì§ë¥¼ ì íí´ì£¼ì¸ì.');
       return;
     }
 
     try {
-      setStatusMessage('loading', `${activeAchievementTab.label} 이미지를 GitHub에 업로드하는 중입니다.`);
+      setStatusMessage('loading', `${activeAchievementTab.label} ì´ë¯¸ì§ë¥¼ GitHubì ìë¡ëíë ì¤ìëë¤.`);
 
       const uploadedImagePaths: string[] = [];
       const nextPreviewUrls: Record<string, string> = {};
@@ -653,20 +704,20 @@ export default function Admin() {
         ...prev,
         ...nextPreviewUrls,
       }));
-      setStatusMessage('success', `${activeAchievementTab.label} 이미지가 추가되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.`);
+      setStatusMessage('success', `${activeAchievementTab.label} ì´ë¯¸ì§ê° ì¶ê°ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.`);
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : '인증 자료 이미지 업로드에 실패했습니다.');
+      setStatusMessage('error', error instanceof Error ? error.message : 'ì¸ì¦ ìë£ ì´ë¯¸ì§ ìë¡ëì ì¤í¨íìµëë¤.');
     }
   }
 
   async function handleAchievementImageDelete(tabId: string, imagePath: string) {
     if (!content) {
-      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
       return;
     }
 
     try {
-      setStatusMessage('loading', '인증 자료 이미지를 삭제하는 중입니다.');
+      setStatusMessage('loading', 'ì¸ì¦ ìë£ ì´ë¯¸ì§ë¥¼ ì­ì íë ì¤ìëë¤.');
 
       await deleteUploadedImage(token, imagePath);
 
@@ -693,9 +744,9 @@ export default function Admin() {
         delete nextPreviewUrls[imagePath];
         return nextPreviewUrls;
       });
-      setStatusMessage('success', '인증 자료 이미지가 삭제되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+      setStatusMessage('success', 'ì¸ì¦ ìë£ ì´ë¯¸ì§ê° ì­ì ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : '인증 자료 이미지 삭제에 실패했습니다.');
+      setStatusMessage('error', error instanceof Error ? error.message : 'ì¸ì¦ ìë£ ì´ë¯¸ì§ ì­ì ì ì¤í¨íìµëë¤.');
     }
   }
 
@@ -704,7 +755,8 @@ export default function Admin() {
     setContent(null);
     setStatus('idle');
     setMessage('');
-    setSelectedHeroImage(null);
+    setSelectedHeroImages([]);
+    setHeroImagePreviewUrls({});
     setSelectedAboutImages([]);
     setAboutImagePreviewUrls({});
     setSelectedServiceImages([]);
@@ -773,27 +825,6 @@ export default function Admin() {
     });
   }
 
-  function updateAchievementTab(tabId: string, key: keyof Pick<AchievementTab, 'label' | 'title' | 'description'>, value: string) {
-    setContent((prev) => {
-      if (!prev) return prev;
-
-      return {
-        ...prev,
-        achievements: {
-          ...prev.achievements,
-          tabs: prev.achievements.tabs.map((tab) =>
-            tab.id === tabId
-              ? {
-                  ...tab,
-                  [key]: value,
-                }
-              : tab
-          ),
-        },
-      };
-    });
-  }
-
   function updateService(index: number, key: keyof ServiceItem, value: string) {
     setContent((prev) => {
       if (!prev) return prev;
@@ -808,6 +839,19 @@ export default function Admin() {
         services: {
           ...prev.services,
           items,
+        },
+      };
+    });
+  }
+
+  function updateServices<Key extends keyof ServicesContent>(key: Key, value: ServicesContent[Key]) {
+    setContent((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        services: {
+          ...prev.services,
+          [key]: value,
         },
       };
     });
@@ -915,9 +959,9 @@ export default function Admin() {
           </div>
 
           <div className="text-center">
-            <h1 className="text-2xl font-black tracking-tight">Admin CMS 접속</h1>
+            <h1 className="text-2xl font-black tracking-tight">Admin CMS ì ì</h1>
             <p className="mt-3 text-sm text-slate-300">
-              GitHub Personal Access Token이 필요합니다.
+              GitHub Personal Access Tokenì´ íìí©ëë¤.
             </p>
           </div>
 
@@ -965,7 +1009,7 @@ export default function Admin() {
                 onChange={(event) => setRememberToken(event.target.checked)}
                 className="h-4 w-4 rounded border-white/20 bg-zinc-900"
               />
-              이 기기에 토큰 임시 저장
+              ì´ ê¸°ê¸°ì í í° ìì ì ì¥
             </label>
 
             {message && (
@@ -989,14 +1033,14 @@ export default function Admin() {
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Github size={18} />}
-              인증 및 접속
+              ì¸ì¦ ë° ì ì
             </button>
 
             <a
               href="/"
               className="block text-center text-xs font-bold text-slate-300 transition hover:text-white"
             >
-              홈으로 돌아가기
+              íì¼ë¡ ëìê°ê¸°
             </a>
           </div>
         </div>
@@ -1011,9 +1055,9 @@ export default function Admin() {
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-400">Admin Page</p>
-              <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">민영정밀 관리자 페이지</h1>
+              <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">ë¯¼ìì ë° ê´ë¦¬ì íì´ì§</h1>
               <p className="mt-4 max-w-2xl text-slate-300">
-                홈페이지 문구와 회사 정보를 수정한 뒤 GitHub에 저장합니다. 저장 후 Cloudflare Pages가 자동으로 재배포합니다.
+                ííì´ì§ ë¬¸êµ¬ì íì¬ ì ë³´ë¥¼ ìì í ë¤ GitHubì ì ì¥í©ëë¤. ì ì¥ í Cloudflare Pagesê° ìëì¼ë¡ ì¬ë°°í¬í©ëë¤.
               </p>
             </div>
 
@@ -1022,7 +1066,7 @@ export default function Admin() {
                 href="/"
                 className="inline-flex items-center justify-center rounded-xl border border-white/20 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
               >
-                홈페이지로 돌아가기
+                ííì´ì§ë¡ ëìê°ê¸°
               </a>
 
               <button
@@ -1031,7 +1075,7 @@ export default function Admin() {
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-100"
               >
                 <LogOut size={16} />
-                로그아웃
+                ë¡ê·¸ìì
               </button>
             </div>
           </div>
@@ -1042,7 +1086,7 @@ export default function Admin() {
         <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-bold text-slate-900">연결된 저장소</p>
+              <p className="text-sm font-bold text-slate-900">ì°ê²°ë ì ì¥ì</p>
               <p className="mt-1 text-sm text-slate-500">
                 {repositoryLabel} / {githubContentConfig.path}
               </p>
@@ -1056,7 +1100,7 @@ export default function Admin() {
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                데이터 새로고침
+                ë°ì´í° ìë¡ê³ ì¹¨
               </button>
 
               <button
@@ -1066,7 +1110,7 @@ export default function Admin() {
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                저장하기
+                ì ì¥íê¸°
               </button>
             </div>
           </div>
@@ -1097,84 +1141,118 @@ export default function Admin() {
         {!content ? (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
             <ListChecks size={42} className="mx-auto text-slate-400" />
-            <h2 className="mt-4 text-xl font-bold text-slate-900">데이터를 불러오는 중입니다.</h2>
+            <h2 className="mt-4 text-xl font-bold text-slate-900">ë°ì´í°ë¥¼ ë¶ë¬ì¤ë ì¤ìëë¤.</h2>
           </div>
         ) : (
           <div className="space-y-6">
             <AdminSection
-              title="메인 배경 이미지"
-              description="홈페이지 첫 화면의 배경 이미지를 업로드하거나 삭제할 수 있습니다. 권장 크기는 1920×1080 이상, 용량은 5MB 이하입니다."
+              title="ë©ì¸ ëí ì´ë¯¸ì§ ì¬ë¼ì´ë"
+              description={`ííì´ì§ ì²« íë©´ì ëí ì´ë¯¸ì§ë¥¼ ê´ë¦¬í©ëë¤. ìµë ${MAX_HERO_IMAGES}ì¥ê¹ì§ ë±ë¡í  ì ìì¼ë©°, ì¬ë¬ ì¥ì´ë©´ ìëì¼ë¡ ì íë©ëë¤.`}
             >
               <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
-                <div>
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                    <div className="flex items-center gap-3 text-slate-900">
-                      <ImagePlus size={22} className="text-blue-600" />
-                      <div>
-                        <h3 className="font-bold">배경 이미지 업로드</h3>
-                        <p className="mt-1 text-sm text-slate-500">
-                          JPG, PNG, WEBP, GIF 파일을 사용할 수 있습니다.
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <div className="flex items-center gap-3 text-slate-900">
+                    <ImagePlus size={22} className="text-blue-600" />
+                    <div>
+                      <h3 className="font-bold">ë©ì¸ ëí ì´ë¯¸ì§ ì¶ê°</h3>
+                      <p className="mt-1 text-sm text-slate-500">
+                        JPG, PNG, WEBP, GIF íì¼ì ì¬ì©í  ì ììµëë¤. íì¬ {heroImages.length}/{MAX_HERO_IMAGES}ì¥ ë±ë¡ëì´ ììµëë¤.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(event) => setSelectedHeroImages(Array.from(event.target.files || []))}
+                      className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-slate-800"
+                    />
+
+                    {selectedHeroImages.length > 0 && (
+                      <div className="mt-3 rounded-xl bg-white p-3 text-sm text-slate-600">
+                        <p className="font-bold text-slate-800">
+                          ì íë íì¼ {selectedHeroImages.length}ê°
                         </p>
+
+                        <ul className="mt-2 max-h-36 space-y-1 overflow-auto pr-1">
+                          {selectedHeroImages.map((file, index) => (
+                            <li key={`${file.name}-${index}`} className="break-all text-xs text-slate-500">
+                              {index + 1}. {file.name}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    </div>
+                    )}
+                  </div>
 
-                    <div className="mt-5">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(event) => setSelectedHeroImage(event.target.files?.[0] || null)}
-                        className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-slate-800"
-                      />
+                  <button
+                    type="button"
+                    onClick={handleHeroImageUpload}
+                    disabled={isBusy || selectedHeroImages.length === 0 || heroImages.length >= MAX_HERO_IMAGES}
+                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
+                    ë©ì¸ ëí ì´ë¯¸ì§ ì¶ê°
+                  </button>
 
-                      {selectedHeroImage && (
-                        <p className="mt-3 text-sm text-slate-600">
-                          선택된 파일: <strong>{selectedHeroImage.name}</strong>
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                      <button
-                        type="button"
-                        onClick={handleHeroImageUpload}
-                        disabled={isBusy || !selectedHeroImage}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
-                        이미지 업로드 및 적용
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleHeroImageDelete}
-                        disabled={isBusy || !content.hero.backgroundImage}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
-                        현재 이미지 삭제
-                      </button>
-                    </div>
+                  <div className="mt-5">
+                    <TextInput
+                      label="ë©ì¸ ì´ë¯¸ì§ ì í ìê°(ms)"
+                      value={String(content.hero.slideIntervalMs || 4500)}
+                      onChange={(value) => updateHero('slideIntervalMs', Number(value) || 4500)}
+                    />
                   </div>
                 </div>
 
                 <div>
-                  <p className="mb-2 text-sm font-bold text-slate-700">현재 배경 이미지</p>
+                  <p className="mb-2 text-sm font-bold text-slate-700">ë±ë¡ë ë©ì¸ ëí ì´ë¯¸ì§</p>
 
-                  {content.hero.backgroundImage ? (
-                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
-                      <img
-                        src={content.hero.backgroundImage}
-                        alt="현재 메인 배경 이미지"
-                        className="h-56 w-full object-cover"
-                      />
-                      <div className="border-t border-slate-200 bg-white p-4">
-                        <p className="break-all text-xs text-slate-500">{content.hero.backgroundImage}</p>
-                      </div>
+                  {heroImages.length > 0 ? (
+                    <div className="space-y-4">
+                      {heroImages.map((image, index) => (
+                        <div key={`${image}-${index}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                          <img
+                            src={heroImagePreviewUrls[image] || image}
+                            alt={`ë©ì¸ ëí ì´ë¯¸ì§ ${index + 1}`}
+                            className="h-40 w-full object-cover"
+                            onError={(event) => {
+                              event.currentTarget.style.display = 'none';
+                            }}
+                          />
+
+                          <div className="space-y-3 border-t border-slate-200 p-4">
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="text-xs font-bold text-slate-700">
+                                {index === 0 ? 'ëí 1ë² ì´ë¯¸ì§' : `ì¬ë¼ì´ë ì´ë¯¸ì§ ${index + 1}`}
+                              </p>
+                              {index === 0 && (
+                                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
+                                  ê¸°ë³¸ ëí
+                                </span>
+                              )}
+                            </div>
+
+                            <p className="break-all text-xs text-slate-500">{image}</p>
+
+                            <button
+                              type="button"
+                              onClick={() => handleHeroImageDelete(image)}
+                              disabled={isBusy}
+                              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {isBusy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                              ì´ ì´ë¯¸ì§ ì­ì 
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <EmptyImageBox
-                      text="현재 설정된 이미지가 없습니다."
-                      subText="기본 다크 그라데이션 배경이 표시됩니다."
+                      text="ë±ë¡ë ë©ì¸ ëí ì´ë¯¸ì§ê° ììµëë¤."
+                      subText="ì´ë¯¸ì§ê° ìì¼ë©´ ê¸°ë³¸ ë¤í¬ ë°°ê²½ì´ íìë©ëë¤."
                     />
                   )}
                 </div>
@@ -1182,17 +1260,17 @@ export default function Admin() {
             </AdminSection>
 
             <AdminSection
-              title="회사소개 슬라이드 이미지"
-              description={`회사소개 오른쪽 영역에 표시될 이미지를 관리합니다. 최대 ${MAX_ABOUT_IMAGES}장까지 등록할 수 있으며, 여러 장이면 자동으로 전환됩니다.`}
+              title="íì¬ìê° ì¬ë¼ì´ë ì´ë¯¸ì§"
+              description={`íì¬ìê° ì¤ë¥¸ìª½ ìì­ì íìë  ì´ë¯¸ì§ë¥¼ ê´ë¦¬í©ëë¤. ìµë ${MAX_ABOUT_IMAGES}ì¥ê¹ì§ ë±ë¡í  ì ìì¼ë©°, ì¬ë¬ ì¥ì´ë©´ ìëì¼ë¡ ì íë©ëë¤.`}
             >
               <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                   <div className="flex items-center gap-3 text-slate-900">
                     <ImagePlus size={22} className="text-blue-600" />
                     <div>
-                      <h3 className="font-bold">회사소개 이미지 추가</h3>
+                      <h3 className="font-bold">íì¬ìê° ì´ë¯¸ì§ ì¶ê°</h3>
                       <p className="mt-1 text-sm text-slate-500">
-                        JPG, PNG, WEBP, GIF 파일을 사용할 수 있습니다. 현재 {aboutImages.length}/{MAX_ABOUT_IMAGES}장 등록되어 있습니다.
+                        JPG, PNG, WEBP, GIF íì¼ì ì¬ì©í  ì ììµëë¤. íì¬ {aboutImages.length}/{MAX_ABOUT_IMAGES}ì¥ ë±ë¡ëì´ ììµëë¤.
                       </p>
                     </div>
                   </div>
@@ -1209,7 +1287,7 @@ export default function Admin() {
                     {selectedAboutImages.length > 0 && (
                       <div className="mt-3 rounded-xl bg-white p-3 text-sm text-slate-600">
                         <p className="font-bold text-slate-800">
-                          선택된 파일 {selectedAboutImages.length}개
+                          ì íë íì¼ {selectedAboutImages.length}ê°
                         </p>
 
                         <ul className="mt-2 space-y-1">
@@ -1231,13 +1309,13 @@ export default function Admin() {
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
-                      회사소개 이미지 추가
+                      íì¬ìê° ì´ë¯¸ì§ ì¶ê°
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <p className="mb-2 text-sm font-bold text-slate-700">등록된 회사소개 이미지</p>
+                  <p className="mb-2 text-sm font-bold text-slate-700">ë±ë¡ë íì¬ìê° ì´ë¯¸ì§</p>
 
                   {aboutImages.length > 0 ? (
                     <div className="space-y-4">
@@ -1245,7 +1323,7 @@ export default function Admin() {
                         <div key={`${image}-${index}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
                           <img
                             src={aboutImagePreviewUrls[image] || image}
-                            alt={`회사소개 이미지 ${index + 1}`}
+                            alt={`íì¬ìê° ì´ë¯¸ì§ ${index + 1}`}
                             className="h-40 w-full object-cover"
                             onError={(event) => {
                               event.currentTarget.style.display = 'none';
@@ -1262,7 +1340,7 @@ export default function Admin() {
                               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               {isBusy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                              이 이미지 삭제
+                              ì´ ì´ë¯¸ì§ ì­ì 
                             </button>
                           </div>
                         </div>
@@ -1270,8 +1348,8 @@ export default function Admin() {
                     </div>
                   ) : (
                     <EmptyImageBox
-                      text="등록된 회사소개 이미지가 없습니다."
-                      subText="이미지가 없으면 기존 MIN YOUNG 카드가 표시됩니다."
+                      text="ë±ë¡ë íì¬ìê° ì´ë¯¸ì§ê° ììµëë¤."
+                      subText="ì´ë¯¸ì§ê° ìì¼ë©´ ê¸°ì¡´ MIN YOUNG ì¹´ëê° íìë©ëë¤."
                     />
                   )}
                 </div>
@@ -1279,17 +1357,17 @@ export default function Admin() {
             </AdminSection>
 
             <AdminSection
-              title="사업 분야 슬라이드 이미지"
-              description={`주요 사업 분야 섹션의 좌측에 표시될 이미지를 관리합니다. 최대 ${MAX_SERVICE_IMAGES}장까지 등록할 수 있으며, 여러 장이면 자동으로 전환됩니다.`}
+              title="ì¬ì ë¶ì¼ ì¬ë¼ì´ë ì´ë¯¸ì§"
+              description={`ì£¼ì ì¬ì ë¶ì¼ ì¹ì ì¼ìª½ì íìë  ì´ë¯¸ì§ë¥¼ ê´ë¦¬í©ëë¤. ìµë ${MAX_SERVICE_IMAGES}ì¥ê¹ì§ ë±ë¡í  ì ììµëë¤.`}
             >
               <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                   <div className="flex items-center gap-3 text-slate-900">
                     <ImagePlus size={22} className="text-blue-600" />
                     <div>
-                      <h3 className="font-bold">사업 분야 이미지 추가</h3>
+                      <h3 className="font-bold">ì¬ì ë¶ì¼ ì´ë¯¸ì§ ì¶ê°</h3>
                       <p className="mt-1 text-sm text-slate-500">
-                        JPG, PNG, WEBP, GIF 파일을 사용할 수 있습니다. 현재 {serviceImages.length}/{MAX_SERVICE_IMAGES}장 등록되어 있습니다.
+                        JPG, PNG, WEBP, GIF íì¼ì ì¬ì©í  ì ììµëë¤. íì¬ {serviceImages.length}/{MAX_SERVICE_IMAGES}ì¥ ë±ë¡ëì´ ììµëë¤.
                       </p>
                     </div>
                   </div>
@@ -1306,7 +1384,7 @@ export default function Admin() {
                     {selectedServiceImages.length > 0 && (
                       <div className="mt-3 rounded-xl bg-white p-3 text-sm text-slate-600">
                         <p className="font-bold text-slate-800">
-                          선택된 파일 {selectedServiceImages.length}개
+                          ì íë íì¼ {selectedServiceImages.length}ê°
                         </p>
 
                         <ul className="mt-2 max-h-36 space-y-1 overflow-auto pr-1">
@@ -1320,50 +1398,52 @@ export default function Admin() {
                     )}
                   </div>
 
+                  <button
+                    type="button"
+                    onClick={handleServiceImageUpload}
+                    disabled={isBusy || selectedServiceImages.length === 0 || serviceImages.length >= MAX_SERVICE_IMAGES}
+                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
+                    ì¬ì ë¶ì¼ ì´ë¯¸ì§ ì¶ê°
+                  </button>
+
                   <div className="mt-5">
-                    <button
-                      type="button"
-                      onClick={handleServiceImageUpload}
-                      disabled={isBusy || selectedServiceImages.length === 0 || serviceImages.length >= MAX_SERVICE_IMAGES}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
-                      사업 분야 이미지 추가
-                    </button>
+                    <TextInput
+                      label="ì¬ì ë¶ì¼ ì´ë¯¸ì§ ì í ìê°(ms)"
+                      value={String(content.services.slideIntervalMs || 4000)}
+                      onChange={(value) => updateServices('slideIntervalMs', Number(value) || 4000)}
+                    />
                   </div>
                 </div>
 
                 <div>
-                  <p className="mb-2 text-sm font-bold text-slate-700">등록된 사업 분야 이미지</p>
+                  <p className="mb-2 text-sm font-bold text-slate-700">ë±ë¡ë ì¬ì ë¶ì¼ ì´ë¯¸ì§</p>
 
                   {serviceImages.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-4">
                       {serviceImages.map((image, index) => (
                         <div key={`${image}-${index}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                          <div className="aspect-[4/3] bg-slate-50 p-2">
-                            <img
-                              src={serviceImagePreviewUrls[image] || image}
-                              alt={`사업 분야 이미지 ${index + 1}`}
-                              className="h-full w-full object-contain"
-                              onError={(event) => {
-                                event.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          </div>
+                          <img
+                            src={serviceImagePreviewUrls[image] || image}
+                            alt={`ì¬ì ë¶ì¼ ì´ë¯¸ì§ ${index + 1}`}
+                            className="h-40 w-full object-cover"
+                            onError={(event) => {
+                              event.currentTarget.style.display = 'none';
+                            }}
+                          />
 
-                          <div className="space-y-2 border-t border-slate-200 p-3">
-                            <p className="truncate text-xs font-bold text-slate-600">
-                              사업 분야 {index + 1}
-                            </p>
+                          <div className="space-y-3 border-t border-slate-200 p-4">
+                            <p className="break-all text-xs text-slate-500">{image}</p>
 
                             <button
                               type="button"
                               onClick={() => handleServiceImageDelete(image)}
                               disabled={isBusy}
-                              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                              {isBusy ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                              삭제
+                              {isBusy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                              ì´ ì´ë¯¸ì§ ì­ì 
                             </button>
                           </div>
                         </div>
@@ -1371,8 +1451,8 @@ export default function Admin() {
                     </div>
                   ) : (
                     <EmptyImageBox
-                      text="등록된 사업 분야 이미지가 없습니다."
-                      subText="이미지가 없으면 기본 다크 안내 박스가 표시됩니다."
+                      text="ë±ë¡ë ì¬ì ë¶ì¼ ì´ë¯¸ì§ê° ììµëë¤."
+                      subText="ì´ë¯¸ì§ê° ìì¼ë©´ ê¸°ë³¸ ìë´ ë°ì¤ê° íìë©ëë¤."
                     />
                   )}
                 </div>
@@ -1380,8 +1460,8 @@ export default function Admin() {
             </AdminSection>
 
             <AdminSection
-              title="인증서 · 상패 · 특허 자료 관리"
-              description="홈페이지에는 탭 없이 모든 이미지가 한눈에 보이는 갤러리로 표시됩니다. 여기서는 분류별로 업로드하고 삭제만 쉽게 관리합니다."
+              title="ì¸ì¦ì Â· ìí¨ Â· í¹í ìë£ ê´ë¦¬"
+              description="ííì´ì§ìë í­ ìì´ ëª¨ë  ì´ë¯¸ì§ê° íëì ë³´ì´ë ê°¤ë¬ë¦¬ë¡ íìë©ëë¤. ì¬ê¸°ìë ë¶ë¥ë³ë¡ ìë¡ëíê³  ì­ì ë§ ì½ê² ê´ë¦¬í©ëë¤."
             >
               <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
@@ -1391,15 +1471,15 @@ export default function Admin() {
                     </div>
 
                     <div>
-                      <h3 className="font-bold text-slate-900">자료 업로드</h3>
+                      <h3 className="font-bold text-slate-900">ìë£ ìë¡ë</h3>
                       <p className="mt-1 text-sm text-slate-500">
-                        분류를 고르고 여러 이미지를 한 번에 추가할 수 있습니다.
+                        ë¶ë¥ë¥¼ ê³ ë¥´ê³  ì¬ë¬ ì´ë¯¸ì§ë¥¼ í ë²ì ì¶ê°í  ì ììµëë¤.
                       </p>
                     </div>
                   </div>
 
                   <div className="mt-5">
-                    <p className="mb-2 text-sm font-bold text-slate-700">업로드할 분류</p>
+                    <p className="mb-2 text-sm font-bold text-slate-700">ìë¡ëí  ë¶ë¥</p>
                     <div className="grid gap-2">
                       {achievementTabs.map((tab) => (
                         <button
@@ -1420,7 +1500,7 @@ export default function Admin() {
                           </span>
 
                           <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-500">
-                            {tab.images?.length || 0}장
+                            {tab.images?.length || 0}ì¥
                           </span>
                         </button>
                       ))}
@@ -1439,7 +1519,7 @@ export default function Admin() {
                     {selectedAchievementImages.length > 0 && (
                       <div className="mt-3 rounded-xl bg-white p-3 text-sm text-slate-600">
                         <p className="font-bold text-slate-800">
-                          선택된 파일 {selectedAchievementImages.length}개
+                          ì íë íì¼ {selectedAchievementImages.length}ê°
                         </p>
 
                         <ul className="mt-2 max-h-36 space-y-1 overflow-auto pr-1">
@@ -1460,13 +1540,13 @@ export default function Admin() {
                     className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
-                    선택한 분류에 이미지 추가
+                    ì íí ë¶ë¥ì ì´ë¯¸ì§ ì¶ê°
                   </button>
 
                   <div className="mt-5 rounded-2xl bg-white p-4 text-sm text-slate-600">
-                    <p className="font-bold text-slate-900">현재 전체 등록 수: {totalAchievementImages}장</p>
+                    <p className="font-bold text-slate-900">íì¬ ì ì²´ ë±ë¡ ì: {totalAchievementImages}ì¥</p>
                     <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                      홈페이지에서는 분류와 상관없이 모든 이미지가 한 줄 갤러리 형태로 정리되어 표시됩니다.
+                      ííì´ì§ììë ë¶ë¥ì ìê´ìì´ ëª¨ë  ì´ë¯¸ì§ê° í ì¤ ê°¤ë¬ë¦¬ ííë¡ ì ë¦¬ëì´ íìë©ëë¤.
                     </p>
                   </div>
                 </div>
@@ -1483,7 +1563,7 @@ export default function Admin() {
                             {tab.label}
                           </h3>
                           <p className="mt-1 text-sm text-slate-500">
-                            등록된 이미지 {tab.images?.length || 0}장
+                            ë±ë¡ë ì´ë¯¸ì§ {tab.images?.length || 0}ì¥
                           </p>
                         </div>
 
@@ -1492,7 +1572,7 @@ export default function Admin() {
                           onClick={() => setSelectedAchievementTabId(tab.id)}
                           className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-200"
                         >
-                          이 분류에 추가
+                          ì´ ë¶ë¥ì ì¶ê°
                         </button>
                       </div>
 
@@ -1503,7 +1583,7 @@ export default function Admin() {
                               <div className="aspect-[3/4] bg-white p-2">
                                 <img
                                   src={achievementImagePreviewUrls[image] || image}
-                                  alt={`${tab.label} 이미지 ${index + 1}`}
+                                  alt={`${tab.label} ì´ë¯¸ì§ ${index + 1}`}
                                   className="h-full w-full object-contain"
                                   onError={(event) => {
                                     event.currentTarget.style.display = 'none';
@@ -1523,14 +1603,14 @@ export default function Admin() {
                                   className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                   {isBusy ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                                  삭제
+                                  ì­ì 
                                 </button>
                               </div>
                             </div>
                           ))
                         ) : (
                           <div className="col-span-2 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500 md:col-span-3">
-                            아직 등록된 이미지가 없습니다.
+                            ìì§ ë±ë¡ë ì´ë¯¸ì§ê° ììµëë¤.
                           </div>
                         )}
                       </div>
@@ -1540,49 +1620,49 @@ export default function Admin() {
               </div>
             </AdminSection>
 
-            <AdminSection title="회사 기본 정보" description="회사명, 대표자, 연락처, 주소 등 홈페이지 전반에 사용되는 정보입니다.">
+            <AdminSection title="íì¬ ê¸°ë³¸ ì ë³´" description="íì¬ëª, ëíì, ì°ë½ì², ì£¼ì ë± ííì´ì§ ì ë°ì ì¬ì©ëë ì ë³´ìëë¤.">
               <div className="grid gap-5 md:grid-cols-2">
-                <TextInput label="회사명" value={content.company.name} onChange={(value) => updateCompany('name', value)} />
-                <TextInput label="영문 회사명" value={content.company.englishName} onChange={(value) => updateCompany('englishName', value)} />
-                <TextInput label="대표자" value={content.company.representative} onChange={(value) => updateCompany('representative', value)} />
-                <TextInput label="이메일" type="email" value={content.company.email} onChange={(value) => updateCompany('email', value)} />
-                <TextInput label="전화번호" value={content.company.phone} onChange={(value) => updateCompany('phone', value)} />
-                <TextInput label="팩스번호" value={content.company.fax} onChange={(value) => updateCompany('fax', value)} />
-                <TextInput label="주소" value={content.company.address} onChange={(value) => updateCompany('address', value)} />
-                <TextInput label="사업자등록번호" value={content.company.businessNumber} onChange={(value) => updateCompany('businessNumber', value)} />
+                <TextInput label="íì¬ëª" value={content.company.name} onChange={(value) => updateCompany('name', value)} />
+                <TextInput label="ìë¬¸ íì¬ëª" value={content.company.englishName} onChange={(value) => updateCompany('englishName', value)} />
+                <TextInput label="ëíì" value={content.company.representative} onChange={(value) => updateCompany('representative', value)} />
+                <TextInput label="ì´ë©ì¼" type="email" value={content.company.email} onChange={(value) => updateCompany('email', value)} />
+                <TextInput label="ì íë²í¸" value={content.company.phone} onChange={(value) => updateCompany('phone', value)} />
+                <TextInput label="í©ì¤ë²í¸" value={content.company.fax} onChange={(value) => updateCompany('fax', value)} />
+                <TextInput label="ì£¼ì" value={content.company.address} onChange={(value) => updateCompany('address', value)} />
+                <TextInput label="ì¬ììë±ë¡ë²í¸" value={content.company.businessNumber} onChange={(value) => updateCompany('businessNumber', value)} />
                 <div className="md:col-span-2">
-                  <TextInput label="푸터 영문 문구" value={content.company.tagline} onChange={(value) => updateCompany('tagline', value)} />
+                  <TextInput label="í¸í° ìë¬¸ ë¬¸êµ¬" value={content.company.tagline} onChange={(value) => updateCompany('tagline', value)} />
                 </div>
               </div>
             </AdminSection>
 
-            <AdminSection title="메인 화면" description="홈페이지 첫 화면에 보이는 큰 문구와 버튼입니다.">
+            <AdminSection title="ë©ì¸ íë©´" description="ííì´ì§ ì²« íë©´ì ë³´ì´ë í° ë¬¸êµ¬ì ë²í¼ìëë¤.">
               <div className="grid gap-5 md:grid-cols-2">
-                <TextInput label="상단 영문 문구" value={content.hero.eyebrow} onChange={(value) => updateHero('eyebrow', value)} />
-                <TextInput label="강조할 단어" value={content.hero.highlight} onChange={(value) => updateHero('highlight', value)} />
+                <TextInput label="ìë¨ ìë¬¸ ë¬¸êµ¬" value={content.hero.eyebrow} onChange={(value) => updateHero('eyebrow', value)} />
+                <TextInput label="ê°ì¡°í  ë¨ì´" value={content.hero.highlight} onChange={(value) => updateHero('highlight', value)} />
                 <div className="md:col-span-2">
-                  <TextInput label="큰 제목" value={content.hero.title} onChange={(value) => updateHero('title', value)} />
+                  <TextInput label="í° ì ëª©" value={content.hero.title} onChange={(value) => updateHero('title', value)} />
                 </div>
                 <div className="md:col-span-2">
-                  <TextArea label="설명 문구" rows={4} value={content.hero.description} onChange={(value) => updateHero('description', value)} />
+                  <TextArea label="ì¤ëª ë¬¸êµ¬" rows={4} value={content.hero.description} onChange={(value) => updateHero('description', value)} />
                 </div>
-                <TextInput label="첫 번째 버튼 문구" value={content.hero.primaryButton.label} onChange={(value) => updateHero('primaryButton', { ...content.hero.primaryButton, label: value })} />
-                <TextInput label="첫 번째 버튼 링크" value={content.hero.primaryButton.href} onChange={(value) => updateHero('primaryButton', { ...content.hero.primaryButton, href: value })} />
-                <TextInput label="두 번째 버튼 문구" value={content.hero.secondaryButton.label} onChange={(value) => updateHero('secondaryButton', { ...content.hero.secondaryButton, label: value })} />
-                <TextInput label="두 번째 버튼 링크" value={content.hero.secondaryButton.href} onChange={(value) => updateHero('secondaryButton', { ...content.hero.secondaryButton, href: value })} />
+                <TextInput label="ì²« ë²ì§¸ ë²í¼ ë¬¸êµ¬" value={content.hero.primaryButton.label} onChange={(value) => updateHero('primaryButton', { ...content.hero.primaryButton, label: value })} />
+                <TextInput label="ì²« ë²ì§¸ ë²í¼ ë§í¬" value={content.hero.primaryButton.href} onChange={(value) => updateHero('primaryButton', { ...content.hero.primaryButton, href: value })} />
+                <TextInput label="ë ë²ì§¸ ë²í¼ ë¬¸êµ¬" value={content.hero.secondaryButton.label} onChange={(value) => updateHero('secondaryButton', { ...content.hero.secondaryButton, label: value })} />
+                <TextInput label="ë ë²ì§¸ ë²í¼ ë§í¬" value={content.hero.secondaryButton.href} onChange={(value) => updateHero('secondaryButton', { ...content.hero.secondaryButton, href: value })} />
               </div>
             </AdminSection>
 
-            <AdminSection title="회사 소개" description="회사 소개 섹션의 제목과 본문입니다.">
+            <AdminSection title="íì¬ ìê°" description="íì¬ ìê° ì¹ìì ì ëª©ê³¼ ë³¸ë¬¸ìëë¤.">
               <div className="grid gap-5 md:grid-cols-2">
-                <TextInput label="소제목" value={content.about.eyebrow} onChange={(value) => updateAbout('eyebrow', value)} />
-                <TextInput label="오른쪽 박스 제목" value={content.about.visualTitle} onChange={(value) => updateAbout('visualTitle', value)} />
+                <TextInput label="ìì ëª©" value={content.about.eyebrow} onChange={(value) => updateAbout('eyebrow', value)} />
+                <TextInput label="ì¤ë¥¸ìª½ ë°ì¤ ì ëª©" value={content.about.visualTitle} onChange={(value) => updateAbout('visualTitle', value)} />
                 <div className="md:col-span-2">
-                  <TextArea label="소개 제목" rows={3} value={content.about.title} onChange={(value) => updateAbout('title', value)} />
+                  <TextArea label="ìê° ì ëª©" rows={3} value={content.about.title} onChange={(value) => updateAbout('title', value)} />
                 </div>
-                <TextInput label="오른쪽 박스 보조 문구" value={content.about.visualSubtitle} onChange={(value) => updateAbout('visualSubtitle', value)} />
+                <TextInput label="ì¤ë¥¸ìª½ ë°ì¤ ë³´ì¡° ë¬¸êµ¬" value={content.about.visualSubtitle} onChange={(value) => updateAbout('visualSubtitle', value)} />
                 <TextInput
-                  label="슬라이드 전환 시간(ms)"
+                  label="íì¬ìê° ì¬ë¼ì´ë ì í ìê°(ms)"
                   value={String(content.about.slideIntervalMs || 4000)}
                   onChange={(value) => updateAbout('slideIntervalMs', Number(value) || 4000)}
                 />
@@ -1592,7 +1672,7 @@ export default function Admin() {
                 {content.about.paragraphs.map((paragraph, index) => (
                   <TextArea
                     key={index}
-                    label={`소개 본문 ${index + 1}`}
+                    label={`ìê° ë³¸ë¬¸ ${index + 1}`}
                     value={paragraph}
                     onChange={(value) => updateAboutParagraph(index, value)}
                   />
@@ -1600,51 +1680,43 @@ export default function Admin() {
               </div>
             </AdminSection>
 
-            <AdminSection title="주요 사업 분야" description="사업 분야 카드의 제목, 설명, 아이콘 이름을 수정합니다.">
+            <AdminSection title="ì£¼ì ì¬ì ë¶ì¼" description="ì¬ì ë¶ì¼ ì¹´ëì ì ëª©, ì¤ëª, ìì´ì½ ì´ë¦ì ìì í©ëë¤.">
               <div className="grid gap-5 md:grid-cols-2">
                 <TextInput
-                  label="소제목"
+                  label="ìì ëª©"
                   value={content.services.eyebrow}
-                  onChange={(value) =>
-                    setContent((prev) =>
-                      prev ? { ...prev, services: { ...prev.services, eyebrow: value } } : prev
-                    )
-                  }
+                  onChange={(value) => updateServices('eyebrow', value)}
                 />
                 <TextInput
-                  label="제목"
+                  label="ì ëª©"
                   value={content.services.title}
-                  onChange={(value) =>
-                    setContent((prev) =>
-                      prev ? { ...prev, services: { ...prev.services, title: value } } : prev
-                    )
-                  }
+                  onChange={(value) => updateServices('title', value)}
                 />
               </div>
 
               <div className="mt-6 grid gap-5 lg:grid-cols-2">
                 {content.services.items.map((item, index) => (
                   <div key={index} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                    <h3 className="mb-4 font-bold text-slate-900">사업 분야 {index + 1}</h3>
+                    <h3 className="mb-4 font-bold text-slate-900">ì¬ì ë¶ì¼ {index + 1}</h3>
                     <div className="space-y-4">
-                      <TextInput label="제목" value={item.title} onChange={(value) => updateService(index, 'title', value)} />
-                      <TextArea label="설명" value={item.description} onChange={(value) => updateService(index, 'description', value)} />
-                      <TextInput label="아이콘 이름" value={item.icon} onChange={(value) => updateService(index, 'icon', value)} />
+                      <TextInput label="ì ëª©" value={item.title} onChange={(value) => updateService(index, 'title', value)} />
+                      <TextArea label="ì¤ëª" value={item.description} onChange={(value) => updateService(index, 'description', value)} />
+                      <TextInput label="ìì´ì½ ì´ë¦" value={item.icon} onChange={(value) => updateService(index, 'icon', value)} />
                     </div>
                   </div>
                 ))}
               </div>
             </AdminSection>
 
-            <AdminSection title="전문 기술" description="콜렛척, MCT, CNC 등 전문 기술 관련 문구입니다.">
+            <AdminSection title="ì ë¬¸ ê¸°ì " description="ì½ë ì², MCT, CNC ë± ì ë¬¸ ê¸°ì  ê´ë ¨ ë¬¸êµ¬ìëë¤.">
               <div className="grid gap-5 md:grid-cols-2">
-                <TextInput label="소제목" value={content.expertise.eyebrow} onChange={(value) => updateExpertise('eyebrow', value)} />
-                <TextInput label="제목" value={content.expertise.title} onChange={(value) => updateExpertise('title', value)} />
+                <TextInput label="ìì ëª©" value={content.expertise.eyebrow} onChange={(value) => updateExpertise('eyebrow', value)} />
+                <TextInput label="ì ëª©" value={content.expertise.title} onChange={(value) => updateExpertise('title', value)} />
                 <div className="md:col-span-2">
-                  <TextInput label="메인 제목" value={content.expertise.mainTitle} onChange={(value) => updateExpertise('mainTitle', value)} />
+                  <TextInput label="ë©ì¸ ì ëª©" value={content.expertise.mainTitle} onChange={(value) => updateExpertise('mainTitle', value)} />
                 </div>
                 <div className="md:col-span-2">
-                  <TextArea label="메인 설명" value={content.expertise.mainDescription} onChange={(value) => updateExpertise('mainDescription', value)} />
+                  <TextArea label="ë©ì¸ ì¤ëª" value={content.expertise.mainDescription} onChange={(value) => updateExpertise('mainDescription', value)} />
                 </div>
               </div>
 
@@ -1652,7 +1724,7 @@ export default function Admin() {
                 {content.expertise.points.map((point, index) => (
                   <TextInput
                     key={index}
-                    label={`기술 포인트 ${index + 1}`}
+                    label={`ê¸°ì  í¬ì¸í¸ ${index + 1}`}
                     value={point}
                     onChange={(value) => updateExpertisePoint(index, value)}
                   />
@@ -1662,20 +1734,20 @@ export default function Admin() {
               <div className="mt-6 grid gap-5 lg:grid-cols-2">
                 {content.expertise.cards.map((card, index) => (
                   <div key={index} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                    <h3 className="mb-4 font-bold text-slate-900">기술 카드 {index + 1}</h3>
+                    <h3 className="mb-4 font-bold text-slate-900">ê¸°ì  ì¹´ë {index + 1}</h3>
                     <div className="space-y-4">
-                      <TextInput label="제목" value={card.title} onChange={(value) => updateExpertiseCard(index, 'title', value)} />
-                      <TextArea label="설명" value={card.description} onChange={(value) => updateExpertiseCard(index, 'description', value)} />
+                      <TextInput label="ì ëª©" value={card.title} onChange={(value) => updateExpertiseCard(index, 'title', value)} />
+                      <TextArea label="ì¤ëª" value={card.description} onChange={(value) => updateExpertiseCard(index, 'description', value)} />
                     </div>
                   </div>
                 ))}
               </div>
             </AdminSection>
 
-            <AdminSection title="경쟁력" description="민영정밀의 강점 카드입니다.">
+            <AdminSection title="ê²½ìë ¥" description="ë¯¼ìì ë°ì ê°ì  ì¹´ëìëë¤.">
               <div className="grid gap-5 md:grid-cols-2">
                 <TextInput
-                  label="소제목"
+                  label="ìì ëª©"
                   value={content.strengths.eyebrow}
                   onChange={(value) =>
                     setContent((prev) =>
@@ -1684,7 +1756,7 @@ export default function Admin() {
                   }
                 />
                 <TextInput
-                  label="제목"
+                  label="ì ëª©"
                   value={content.strengths.title}
                   onChange={(value) =>
                     setContent((prev) =>
@@ -1697,37 +1769,37 @@ export default function Admin() {
               <div className="mt-6 grid gap-5 lg:grid-cols-2">
                 {content.strengths.items.map((item, index) => (
                   <div key={index} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                    <h3 className="mb-4 font-bold text-slate-900">경쟁력 {index + 1}</h3>
+                    <h3 className="mb-4 font-bold text-slate-900">ê²½ìë ¥ {index + 1}</h3>
                     <div className="space-y-4">
-                      <TextInput label="제목" value={item.title} onChange={(value) => updateStrength(index, 'title', value)} />
-                      <TextArea label="설명" value={item.description} onChange={(value) => updateStrength(index, 'description', value)} />
-                      <TextInput label="아이콘 이름" value={item.icon} onChange={(value) => updateStrength(index, 'icon', value)} />
+                      <TextInput label="ì ëª©" value={item.title} onChange={(value) => updateStrength(index, 'title', value)} />
+                      <TextArea label="ì¤ëª" value={item.description} onChange={(value) => updateStrength(index, 'description', value)} />
+                      <TextInput label="ìì´ì½ ì´ë¦" value={item.icon} onChange={(value) => updateStrength(index, 'icon', value)} />
                     </div>
                   </div>
                 ))}
               </div>
             </AdminSection>
 
-            <AdminSection title="문의 영역" description="문의하기 섹션과 이메일 버튼 문구입니다.">
+            <AdminSection title="ë¬¸ì ìì­" description="ë¬¸ìíê¸° ì¹ìê³¼ ì´ë©ì¼ ë²í¼ ë¬¸êµ¬ìëë¤.">
               <div className="grid gap-5 md:grid-cols-2">
-                <TextInput label="문의 제목" value={content.contact.title} onChange={(value) => updateContact('title', value)} />
-                <TextInput label="버튼 제목" value={content.contact.emailButtonTitle} onChange={(value) => updateContact('emailButtonTitle', value)} />
+                <TextInput label="ë¬¸ì ì ëª©" value={content.contact.title} onChange={(value) => updateContact('title', value)} />
+                <TextInput label="ë²í¼ ì ëª©" value={content.contact.emailButtonTitle} onChange={(value) => updateContact('emailButtonTitle', value)} />
                 <div className="md:col-span-2">
-                  <TextArea label="문의 설명" value={content.contact.description} onChange={(value) => updateContact('description', value)} />
+                  <TextArea label="ë¬¸ì ì¤ëª" value={content.contact.description} onChange={(value) => updateContact('description', value)} />
                 </div>
-                <TextInput label="버튼 설명" value={content.contact.emailButtonDescription} onChange={(value) => updateContact('emailButtonDescription', value)} />
-                <TextInput label="버튼 작은 문구" value={content.contact.emailButtonSmallText} onChange={(value) => updateContact('emailButtonSmallText', value)} />
+                <TextInput label="ë²í¼ ì¤ëª" value={content.contact.emailButtonDescription} onChange={(value) => updateContact('emailButtonDescription', value)} />
+                <TextInput label="ë²í¼ ìì ë¬¸êµ¬" value={content.contact.emailButtonSmallText} onChange={(value) => updateContact('emailButtonSmallText', value)} />
               </div>
             </AdminSection>
 
-            <AdminSection title="푸터" description="하단 저작권 문구입니다.">
-              <TextInput label="저작권 문구" value={content.footer.copyrightText} onChange={(value) => updateFooter('copyrightText', value)} />
+            <AdminSection title="í¸í°" description="íë¨ ì ìê¶ ë¬¸êµ¬ìëë¤.">
+              <TextInput label="ì ìê¶ ë¬¸êµ¬" value={content.footer.copyrightText} onChange={(value) => updateFooter('copyrightText', value)} />
             </AdminSection>
 
             <div className="sticky bottom-4 z-20 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-2xl backdrop-blur">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-sm text-slate-600">
-                  수정 후 반드시 <strong className="text-slate-900">저장하기</strong>를 눌러야 홈페이지에 반영됩니다.
+                  ìì  í ë°ëì <strong className="text-slate-900">ì ì¥íê¸°</strong>ë¥¼ ëë¬ì¼ ííì´ì§ì ë°ìë©ëë¤.
                 </div>
 
                 <button
@@ -1737,7 +1809,7 @@ export default function Admin() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                  저장하기
+                  ì ì¥íê¸°
                 </button>
               </div>
             </div>
@@ -1749,10 +1821,10 @@ export default function Admin() {
         <div className="flex flex-wrap items-center justify-center gap-2">
           <Building2 size={14} />
           <span>Min Young Precision Admin</span>
-          <span>·</span>
+          <span>Â·</span>
           <Mail size={14} />
           <span>GitHub Contents API</span>
-          <span>·</span>
+          <span>Â·</span>
           <MapPin size={14} />
           <span>Cloudflare Pages</span>
         </div>
