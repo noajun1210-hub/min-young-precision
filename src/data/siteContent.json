@@ -60,6 +60,34 @@
     "slideIntervalMs": 4000,
     "images": []
   },
+  "achievements": {
+    "eyebrow": "Certifications & Achievements",
+    "title": "기술의 신뢰를 증명합니다",
+    "description": "민영정밀은 특허, 기술 등록, 인증 및 수상 이력을 바탕으로 정밀가공 분야에서 신뢰할 수 있는 기술력을 쌓아가고 있습니다.",
+    "tabs": [
+      {
+        "id": "patents",
+        "label": "특허 · 기술등록",
+        "title": "독자적인 기술력의 기록",
+        "description": "콜렛척 및 정밀가공 분야에서 축적한 기술과 등록 이력을 확인하실 수 있습니다.",
+        "images": []
+      },
+      {
+        "id": "awards",
+        "label": "인증 · 상패",
+        "title": "품질과 신뢰의 결과",
+        "description": "품질 향상과 기술 경쟁력을 바탕으로 인정받은 인증, 상패 및 관련 자료를 소개합니다.",
+        "images": []
+      },
+      {
+        "id": "records",
+        "label": "주요 실적",
+        "title": "현장에서 쌓아온 가공 노하우",
+        "description": "자동차, 반도체, 정밀기계 분야에서 축적한 주요 성과와 기술 자료를 소개합니다.",
+        "images": []
+      }
+    ]
+  },
   "services": {
     "eyebrow": "Business Fields",
     "title": "주요 사업 분야",
