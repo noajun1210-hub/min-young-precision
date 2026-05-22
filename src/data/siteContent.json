@@ -39,7 +39,9 @@
     "description": "자동차 · 반도체 · 정밀기계 부품 가공 전문\n최고의 기술력으로 완벽한 품질을 약속합니다.",
     "backgroundImage": "/uploads/hero-background-1779403868929.jpg",
     "backgroundImages": [
-      "/uploads/hero-background-1779403868929.jpg"
+      "/uploads/hero-background-1779403868929.jpg",
+      "/uploads/hero-slide-1779463121381.jpeg",
+      "/uploads/hero-slide-1779463133291.jpeg"
     ],
     "slideIntervalMs": 4500,
     "primaryButton": {
