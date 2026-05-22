@@ -42,7 +42,8 @@ export default function Achievements() {
                   href={item.image}
                   target="_blank"
                   rel="noreferrer"
-                  className="group block min-w-[260px] max-w-[260px] text-center sm:min-w-[280px] sm:max-w-[280px] lg:min-w-[292px] lg:max-w-[292px]"
+                  aria-label={`${item.category} 이미지 ${index + 1} 크게 보기`}
+                  className="group block min-w-[260px] max-w-[260px] sm:min-w-[280px] sm:max-w-[280px] lg:min-w-[292px] lg:max-w-[292px]"
                 >
                   <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl">
                     <img
@@ -50,16 +51,6 @@ export default function Achievements() {
                       alt={`${item.category} 이미지 ${index + 1}`}
                       className="block w-full object-contain"
                     />
-                  </div>
-
-                  <div className="mt-4">
-                    <p className="text-xs font-bold uppercase tracking-wider text-brand-blue">
-                      {item.category}
-                    </p>
-
-                    <p className="mt-1 text-sm font-bold text-slate-700">
-                      {item.title}
-                    </p>
                   </div>
                 </a>
               ))}
