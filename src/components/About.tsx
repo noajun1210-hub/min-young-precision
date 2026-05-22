@@ -44,22 +44,22 @@ export default function About() {
           </div>
 
           <div className="relative group">
-            <div className="absolute -inset-4 bg-slate-100 rounded-xl transform rotate-2 group-hover:rotate-1 transition-transform"></div>
+            <div className="absolute -inset-4 bg-slate-100 rounded-2xl transform rotate-2 group-hover:rotate-1 transition-transform"></div>
 
             {images.length > 0 ? (
-              <div className="relative aspect-video rounded-xl shadow-2xl overflow-hidden bg-brand-dark">
+              <div className="relative aspect-[4/3] md:aspect-[5/4] rounded-2xl shadow-2xl overflow-hidden bg-slate-950 border border-slate-100">
                 {images.map((image, index) => (
                   <img
                     key={`${image}-${index}`}
                     src={image}
                     alt={`민영정밀 회사소개 이미지 ${index + 1}`}
-                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
+                    className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-700 ${
                       index === currentImageIndex ? 'opacity-100' : 'opacity-0'
                     }`}
                   />
                 ))}
 
-                <div className="absolute inset-0 bg-slate-950/20"></div>
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/25 via-transparent to-transparent"></div>
 
                 {images.length > 1 && (
                   <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
@@ -80,7 +80,7 @@ export default function About() {
                 )}
               </div>
             ) : (
-              <div className="relative bg-brand-dark aspect-video rounded-xl shadow-2xl flex items-center justify-center p-8 overflow-hidden">
+              <div className="relative bg-brand-dark aspect-[4/3] md:aspect-[5/4] rounded-2xl shadow-2xl flex items-center justify-center p-8 overflow-hidden">
                 <div className="text-center z-10">
                   <div className="text-brand-blue font-mono text-5xl mb-4 italic font-black uppercase tracking-tighter">
                     {about.visualTitle}
