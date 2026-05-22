@@ -131,10 +131,12 @@ function validateImageFile(file: File) {
     throw new Error('이미지 파일만 업로드할 수 있습니다.');
   }
 
-  const maxSize = 5 * 1024 * 1024;
+  const maxSize = 15 * 1024 * 1024;
 
   if (file.size > maxSize) {
-    throw new Error('이미지는 5MB 이하 파일만 업로드해주세요.');
+    throw new Error(
+      '이미지는 15MB 이하 파일만 업로드해주세요. 아이폰 원본 사진이 너무 큰 경우 사진 크기를 줄인 뒤 다시 업로드해주세요.'
+    );
   }
 }
 
