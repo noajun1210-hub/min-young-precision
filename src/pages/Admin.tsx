@@ -15,6 +15,9 @@ import {
   ImagePlus,
   Trash2,
   UploadCloud,
+  Award,
+  FileCheck2,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   deleteUploadedImage,
@@ -22,6 +25,7 @@ import {
   loadSiteContent,
   saveSiteContent,
   uploadAboutSlideImage,
+  uploadAchievementImage,
   uploadHeroBackgroundImage,
 } from '../lib/githubContent';
 
@@ -66,6 +70,21 @@ type AboutContent = {
   visualSubtitle: string;
   slideIntervalMs: number;
   images: string[];
+};
+
+type AchievementTab = {
+  id: string;
+  label: string;
+  title: string;
+  description: string;
+  images: string[];
+};
+
+type AchievementsContent = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  tabs: AchievementTab[];
 };
 
 type ServiceItem = {
@@ -123,6 +142,7 @@ type SiteContent = {
   navigation: NavigationItem[];
   hero: HeroContent;
   about: AboutContent;
+  achievements: AchievementsContent;
   services: ServicesContent;
   expertise: ExpertiseContent;
   strengths: StrengthsContent;
@@ -217,12 +237,20 @@ export default function Admin() {
   const [message, setMessage] = useState('');
   const [selectedHeroImage, setSelectedHeroImage] = useState<File | null>(null);
   const [selectedAboutImage, setSelectedAboutImage] = useState<File | null>(null);
+  const [selectedAchievementImage, setSelectedAchievementImage] = useState<File | null>(null);
+  const [selectedAchievementTabId, setSelectedAchievementTabId] = useState('patents');
 
   const isBusy = status === 'loading';
 
   const repositoryLabel = useMemo(() => {
     return `${githubContentConfig.owner}/${githubContentConfig.repo}`;
   }, []);
+
+  const aboutImages = content?.about.images || [];
+  const achievementTabs = content?.achievements.tabs || [];
+  const activeAchievementTab =
+    achievementTabs.find((tab) => tab.id === selectedAchievementTabId) ||
+    achievementTabs[0];
 
   function setStatusMessage(nextStatus: StatusType, nextMessage: string) {
     setStatus(nextStatus);
@@ -256,7 +284,10 @@ export default function Admin() {
       }
 
       const result = await loadSiteContent(token);
-      setContent(result.content as SiteContent);
+      const loadedContent = result.content as SiteContent;
+
+      setContent(loadedContent);
+      setSelectedAchievementTabId(loadedContent.achievements?.tabs?.[0]?.id || 'patents');
       setIsAuthenticated(true);
       setStatusMessage('success', '관리자 페이지 접속이 완료되었습니다.');
     } catch (error) {
@@ -269,7 +300,10 @@ export default function Admin() {
       setStatusMessage('loading', 'GitHub에서 홈페이지 데이터를 다시 불러오는 중입니다.');
 
       const result = await loadSiteContent(token);
-      setContent(result.content as SiteContent);
+      const loadedContent = result.content as SiteContent;
+
+      setContent(loadedContent);
+      setSelectedAchievementTabId(loadedContent.achievements?.tabs?.[0]?.id || 'patents');
       setStatusMessage('success', '홈페이지 데이터를 다시 불러왔습니다.');
     } catch (error) {
       setStatusMessage('error', error instanceof Error ? error.message : '데이터를 불러오지 못했습니다.');
@@ -429,6 +463,91 @@ export default function Admin() {
     }
   }
 
+  async function handleAchievementImageUpload() {
+    if (!content) {
+      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      return;
+    }
+
+    if (!activeAchievementTab) {
+      setStatusMessage('error', '이미지를 등록할 탭을 찾을 수 없습니다.');
+      return;
+    }
+
+    if (!selectedAchievementImage) {
+      setStatusMessage('error', '업로드할 기술 인증 이미지를 선택해주세요.');
+      return;
+    }
+
+    try {
+      setStatusMessage('loading', `${activeAchievementTab.label} 이미지를 GitHub에 업로드하는 중입니다.`);
+
+      const uploadedImage = await uploadAchievementImage(
+        token,
+        selectedAchievementImage,
+        activeAchievementTab.id
+      );
+
+      const nextContent: SiteContent = {
+        ...content,
+        achievements: {
+          ...content.achievements,
+          tabs: content.achievements.tabs.map((tab) =>
+            tab.id === activeAchievementTab.id
+              ? {
+                  ...tab,
+                  images: [...(tab.images || []), uploadedImage.publicPath],
+                }
+              : tab
+          ),
+        },
+      };
+
+      await saveSiteContent(token, nextContent);
+
+      setContent(nextContent);
+      setSelectedAchievementImage(null);
+      setStatusMessage('success', `${activeAchievementTab.label} 이미지가 추가되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.`);
+    } catch (error) {
+      setStatusMessage('error', error instanceof Error ? error.message : '기술 인증 이미지 업로드에 실패했습니다.');
+    }
+  }
+
+  async function handleAchievementImageDelete(tabId: string, imagePath: string) {
+    if (!content) {
+      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      return;
+    }
+
+    try {
+      setStatusMessage('loading', '기술 인증 이미지를 삭제하는 중입니다.');
+
+      await deleteUploadedImage(token, imagePath);
+
+      const nextContent: SiteContent = {
+        ...content,
+        achievements: {
+          ...content.achievements,
+          tabs: content.achievements.tabs.map((tab) =>
+            tab.id === tabId
+              ? {
+                  ...tab,
+                  images: (tab.images || []).filter((image) => image !== imagePath),
+                }
+              : tab
+          ),
+        },
+      };
+
+      await saveSiteContent(token, nextContent);
+
+      setContent(nextContent);
+      setStatusMessage('success', '기술 인증 이미지가 삭제되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+    } catch (error) {
+      setStatusMessage('error', error instanceof Error ? error.message : '기술 인증 이미지 삭제에 실패했습니다.');
+    }
+  }
+
   function handleLogout() {
     setIsAuthenticated(false);
     setContent(null);
@@ -436,6 +555,7 @@ export default function Admin() {
     setMessage('');
     setSelectedHeroImage(null);
     setSelectedAboutImage(null);
+    setSelectedAchievementImage(null);
 
     if (!rememberToken) {
       setToken('');
@@ -708,8 +828,6 @@ export default function Admin() {
     );
   }
 
-  const aboutImages = content?.about.images || [];
-
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <header className="bg-slate-950 text-white">
@@ -932,10 +1050,6 @@ export default function Admin() {
                       회사소개 이미지 추가
                     </button>
                   </div>
-
-                  <p className="mt-4 text-xs leading-relaxed text-slate-500">
-                    이미지를 추가하면 GitHub의 public/uploads 폴더에 저장되고, 홈페이지 회사소개 영역에 자동 적용됩니다.
-                  </p>
                 </div>
 
                 <div>
@@ -978,6 +1092,136 @@ export default function Admin() {
                   )}
                 </div>
               </div>
+            </AdminSection>
+
+            <AdminSection
+              title="기술 인증 및 성과 이미지 관리"
+              description="특허증, 기술등록증, 인증서, 상패, 주요 실적 이미지를 탭별로 업로드하거나 삭제할 수 있습니다."
+            >
+              <div className="mb-6 flex flex-wrap gap-3">
+                {achievementTabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setSelectedAchievementTabId(tab.id)}
+                    className={`inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold transition-all ${
+                      selectedAchievementTabId === tab.id
+                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    {tab.id === 'patents' && <FileCheck2 size={17} />}
+                    {tab.id === 'awards' && <Award size={17} />}
+                    {tab.id === 'records' && <ShieldCheck size={17} />}
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {activeAchievementTab ? (
+                <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <div className="flex items-center gap-3 text-slate-900">
+                      <ImagePlus size={22} className="text-blue-600" />
+                      <div>
+                        <h3 className="font-bold">{activeAchievementTab.label} 이미지 추가</h3>
+                        <p className="mt-1 text-sm text-slate-500">
+                          현재 {activeAchievementTab.images?.length || 0}장 등록되어 있습니다.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 grid gap-5 md:grid-cols-2">
+                      <TextInput label="탭 제목" value={activeAchievementTab.title} onChange={() => {}} />
+                      <TextInput label="탭 이름" value={activeAchievementTab.label} onChange={() => {}} />
+                    </div>
+
+                    <div className="mt-5">
+                      <p className="mb-2 text-sm font-semibold text-slate-700">탭 설명</p>
+                      <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed text-slate-600">
+                        {activeAchievementTab.description}
+                      </div>
+                    </div>
+
+                    <div className="mt-5">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => setSelectedAchievementImage(event.target.files?.[0] || null)}
+                        className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-slate-800"
+                      />
+
+                      {selectedAchievementImage && (
+                        <p className="mt-3 text-sm text-slate-600">
+                          선택된 파일: <strong>{selectedAchievementImage.name}</strong>
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="mt-5">
+                      <button
+                        type="button"
+                        onClick={handleAchievementImageUpload}
+                        disabled={isBusy || !selectedAchievementImage}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
+                        {activeAchievementTab.label} 이미지 추가
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="mb-2 text-sm font-bold text-slate-700">
+                      등록된 {activeAchievementTab.label} 이미지
+                    </p>
+
+                    {activeAchievementTab.images && activeAchievementTab.images.length > 0 ? (
+                      <div className="space-y-4">
+                        {activeAchievementTab.images.map((image, index) => (
+                          <div key={`${image}-${index}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                            <img
+                              src={image}
+                              alt={`${activeAchievementTab.label} 이미지 ${index + 1}`}
+                              className="h-44 w-full object-cover"
+                            />
+
+                            <div className="space-y-3 border-t border-slate-200 p-4">
+                              <p className="break-all text-xs text-slate-500">{image}</p>
+
+                              <button
+                                type="button"
+                                onClick={() => handleAchievementImageDelete(activeAchievementTab.id, image)}
+                                disabled={isBusy}
+                                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {isBusy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                                이 이미지 삭제
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 text-center">
+                        <div>
+                          <ImagePlus size={34} className="mx-auto text-slate-400" />
+                          <p className="mt-3 text-sm font-bold text-slate-700">
+                            등록된 이미지가 없습니다.
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500">
+                            특허증, 등록증, 상패 이미지를 추가하면 홈페이지 탭에 표시됩니다.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-slate-500">
+                  등록된 탭 정보가 없습니다.
+                </div>
+              )}
             </AdminSection>
 
             <AdminSection title="회사 기본 정보" description="회사명, 대표자, 연락처, 주소 등 홈페이지 전반에 사용되는 정보입니다.">
