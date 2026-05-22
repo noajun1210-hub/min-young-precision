@@ -56,7 +56,9 @@
       "특히 콜렛척(Collet Chuck) 전문 가공에 있어 특허 출원 및 등록을 통해 기술 전문성을 대외적으로 인정받고 있습니다."
     ],
     "visualTitle": "Min Young",
-    "visualSubtitle": "Precision"
+    "visualSubtitle": "Precision",
+    "slideIntervalMs": 4000,
+    "images": []
   },
   "services": {
     "eyebrow": "Business Fields",
