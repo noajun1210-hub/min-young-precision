@@ -21,6 +21,7 @@ import {
   githubContentConfig,
   loadSiteContent,
   saveSiteContent,
+  uploadAboutSlideImage,
   uploadHeroBackgroundImage,
 } from '../lib/githubContent';
 
@@ -63,6 +64,8 @@ type AboutContent = {
   paragraphs: string[];
   visualTitle: string;
   visualSubtitle: string;
+  slideIntervalMs: number;
+  images: string[];
 };
 
 type ServiceItem = {
@@ -213,6 +216,7 @@ export default function Admin() {
   const [status, setStatus] = useState<StatusType>('idle');
   const [message, setMessage] = useState('');
   const [selectedHeroImage, setSelectedHeroImage] = useState<File | null>(null);
+  const [selectedAboutImage, setSelectedAboutImage] = useState<File | null>(null);
 
   const isBusy = status === 'loading';
 
@@ -356,12 +360,82 @@ export default function Admin() {
     }
   }
 
+  async function handleAboutImageUpload() {
+    if (!content) {
+      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      return;
+    }
+
+    if (!selectedAboutImage) {
+      setStatusMessage('error', '업로드할 회사소개 이미지를 선택해주세요.');
+      return;
+    }
+
+    const currentImages = content.about.images || [];
+
+    if (currentImages.length >= 3) {
+      setStatusMessage('error', '회사소개 이미지는 최대 3장까지 등록할 수 있습니다. 기존 이미지를 삭제한 뒤 다시 업로드해주세요.');
+      return;
+    }
+
+    try {
+      setStatusMessage('loading', '회사소개 이미지를 GitHub에 업로드하는 중입니다.');
+
+      const uploadedImage = await uploadAboutSlideImage(token, selectedAboutImage);
+
+      const nextContent: SiteContent = {
+        ...content,
+        about: {
+          ...content.about,
+          images: [...currentImages, uploadedImage.publicPath],
+        },
+      };
+
+      await saveSiteContent(token, nextContent);
+
+      setContent(nextContent);
+      setSelectedAboutImage(null);
+      setStatusMessage('success', '회사소개 이미지가 추가되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+    } catch (error) {
+      setStatusMessage('error', error instanceof Error ? error.message : '회사소개 이미지 업로드에 실패했습니다.');
+    }
+  }
+
+  async function handleAboutImageDelete(imagePath: string) {
+    if (!content) {
+      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      return;
+    }
+
+    try {
+      setStatusMessage('loading', '회사소개 이미지를 삭제하는 중입니다.');
+
+      await deleteUploadedImage(token, imagePath);
+
+      const nextContent: SiteContent = {
+        ...content,
+        about: {
+          ...content.about,
+          images: (content.about.images || []).filter((image) => image !== imagePath),
+        },
+      };
+
+      await saveSiteContent(token, nextContent);
+
+      setContent(nextContent);
+      setStatusMessage('success', '회사소개 이미지가 삭제되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+    } catch (error) {
+      setStatusMessage('error', error instanceof Error ? error.message : '회사소개 이미지 삭제에 실패했습니다.');
+    }
+  }
+
   function handleLogout() {
     setIsAuthenticated(false);
     setContent(null);
     setStatus('idle');
     setMessage('');
     setSelectedHeroImage(null);
+    setSelectedAboutImage(null);
 
     if (!rememberToken) {
       setToken('');
@@ -634,6 +708,8 @@ export default function Admin() {
     );
   }
 
+  const aboutImages = content?.about.images || [];
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <header className="bg-slate-950 text-white">
@@ -784,11 +860,6 @@ export default function Admin() {
                         현재 이미지 삭제
                       </button>
                     </div>
-
-                    <p className="mt-4 text-xs leading-relaxed text-slate-500">
-                      이미지를 업로드하면 GitHub의 public/uploads 폴더에 저장되고, 홈페이지 메인 배경으로 자동 적용됩니다.
-                      삭제하면 기본 다크 그라데이션 배경으로 돌아갑니다.
-                    </p>
                   </div>
                 </div>
 
@@ -812,6 +883,96 @@ export default function Admin() {
                         <ImagePlus size={34} className="mx-auto text-slate-400" />
                         <p className="mt-3 text-sm font-bold text-slate-700">현재 설정된 이미지가 없습니다.</p>
                         <p className="mt-1 text-xs text-slate-500">기본 다크 그라데이션 배경이 표시됩니다.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </AdminSection>
+
+            <AdminSection
+              title="회사소개 슬라이드 이미지"
+              description="회사소개 오른쪽 영역에 표시될 이미지를 관리합니다. 최대 3장까지 등록할 수 있으며, 여러 장이면 자동으로 전환됩니다."
+            >
+              <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <div className="flex items-center gap-3 text-slate-900">
+                    <ImagePlus size={22} className="text-blue-600" />
+                    <div>
+                      <h3 className="font-bold">회사소개 이미지 추가</h3>
+                      <p className="mt-1 text-sm text-slate-500">
+                        JPG, PNG, WEBP, GIF 파일을 사용할 수 있습니다. 현재 {aboutImages.length}/3장 등록되어 있습니다.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) => setSelectedAboutImage(event.target.files?.[0] || null)}
+                      className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-slate-800"
+                    />
+
+                    {selectedAboutImage && (
+                      <p className="mt-3 text-sm text-slate-600">
+                        선택된 파일: <strong>{selectedAboutImage.name}</strong>
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-5">
+                    <button
+                      type="button"
+                      onClick={handleAboutImageUpload}
+                      disabled={isBusy || !selectedAboutImage || aboutImages.length >= 3}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
+                      회사소개 이미지 추가
+                    </button>
+                  </div>
+
+                  <p className="mt-4 text-xs leading-relaxed text-slate-500">
+                    이미지를 추가하면 GitHub의 public/uploads 폴더에 저장되고, 홈페이지 회사소개 영역에 자동 적용됩니다.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-sm font-bold text-slate-700">등록된 회사소개 이미지</p>
+
+                  {aboutImages.length > 0 ? (
+                    <div className="space-y-4">
+                      {aboutImages.map((image, index) => (
+                        <div key={`${image}-${index}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                          <img
+                            src={image}
+                            alt={`회사소개 이미지 ${index + 1}`}
+                            className="h-40 w-full object-cover"
+                          />
+
+                          <div className="space-y-3 border-t border-slate-200 p-4">
+                            <p className="break-all text-xs text-slate-500">{image}</p>
+
+                            <button
+                              type="button"
+                              onClick={() => handleAboutImageDelete(image)}
+                              disabled={isBusy}
+                              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {isBusy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                              이 이미지 삭제
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex h-56 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 text-center">
+                      <div>
+                        <ImagePlus size={34} className="mx-auto text-slate-400" />
+                        <p className="mt-3 text-sm font-bold text-slate-700">등록된 회사소개 이미지가 없습니다.</p>
+                        <p className="mt-1 text-xs text-slate-500">이미지가 없으면 기존 MIN YOUNG 카드가 표시됩니다.</p>
                       </div>
                     </div>
                   )}
@@ -860,6 +1021,11 @@ export default function Admin() {
                   <TextArea label="소개 제목" rows={3} value={content.about.title} onChange={(value) => updateAbout('title', value)} />
                 </div>
                 <TextInput label="오른쪽 박스 보조 문구" value={content.about.visualSubtitle} onChange={(value) => updateAbout('visualSubtitle', value)} />
+                <TextInput
+                  label="슬라이드 전환 시간(ms)"
+                  value={String(content.about.slideIntervalMs || 4000)}
+                  onChange={(value) => updateAbout('slideIntervalMs', Number(value) || 4000)}
+                />
               </div>
 
               <div className="mt-6 space-y-4">
