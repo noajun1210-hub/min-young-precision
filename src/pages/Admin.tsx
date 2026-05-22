@@ -251,7 +251,7 @@ function EmptyImageBox({ text, subText }: { text: string; subText: string }) {
 function ImageErrorFallback() {
   return (
     <div className="flex h-40 items-center justify-center bg-slate-100 px-4 text-center text-xs font-bold text-slate-400">
-      ë°°í¬ ìë£ í ì´ë¯¸ì§ê° íìë©ëë¤.
+      &#xBC30;&#xD3EC; &#xC644;&#xB8CC; &#xD6C4; &#xC774;&#xBBF8;&#xC9C0;&#xAC00; &#xD45C;&#xC2DC;&#xB429;&#xB2C8;&#xB2E4;.
     </div>
   );
 }
@@ -309,15 +309,15 @@ export default function Admin() {
 
   function validateLoginInfo() {
     if (repositoryOwner.trim() !== githubContentConfig.owner) {
-      throw new Error(`Repository Ownerë ${githubContentConfig.owner}ë¡ ìë ¥í´ì£¼ì¸ì.`);
+      throw new Error(`Repository Owner\uB294 ${githubContentConfig.owner}\uB85C \uC785\uB825\uD574\uC8FC\uC138\uC694.`);
     }
 
     if (repositoryName.trim() !== githubContentConfig.repo) {
-      throw new Error(`Repository Nameì ${githubContentConfig.repo}ë¡ ìë ¥í´ì£¼ì¸ì.`);
+      throw new Error(`Repository Name\uC740 ${githubContentConfig.repo}\uB85C \uC785\uB825\uD574\uC8FC\uC138\uC694.`);
     }
 
     if (!token.trim()) {
-      throw new Error('GitHub Personal Access Tokenì ìë ¥í´ì£¼ì¸ì.');
+      throw new Error('GitHub Personal Access Token\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694.');
     }
   }
 
@@ -325,7 +325,7 @@ export default function Admin() {
     try {
       validateLoginInfo();
 
-      setStatusMessage('loading', 'GitHub ì ì¥ìì ì ìíë ì¤ìëë¤.');
+      setStatusMessage('loading', 'GitHub \uC800\uC7A5\uC18C\uC5D0 \uC811\uC18D\uD558\uB294 \uC911\uC785\uB2C8\uB2E4.');
 
       if (rememberToken) {
         localStorage.setItem('minyoung_github_token', token.trim());
@@ -339,64 +339,64 @@ export default function Admin() {
       setContent(loadedContent);
       setSelectedAchievementTabId(loadedContent.achievements?.tabs?.[0]?.id || 'patents');
       setIsAuthenticated(true);
-      setStatusMessage('success', 'ê´ë¦¬ì íì´ì§ ì ìì´ ìë£ëììµëë¤.');
+      setStatusMessage('success', '\uAD00\uB9AC\uC790 \uD398\uC774\uC9C0 \uC811\uC18D\uC774 \uC644\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : 'ì ìíì§ ëª»íìµëë¤.');
+      setStatusMessage('error', error instanceof Error ? error.message : '\uC811\uC18D\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.');
     }
   }
 
   async function handleLoad() {
     try {
-      setStatusMessage('loading', 'GitHubìì ííì´ì§ ë°ì´í°ë¥¼ ë¤ì ë¶ë¬ì¤ë ì¤ìëë¤.');
+      setStatusMessage('loading', 'GitHub\uC5D0\uC11C \uD648\uD398\uC774\uC9C0 \uB370\uC774\uD130\uB97C \uB2E4\uC2DC \uBD88\uB7EC\uC624\uB294 \uC911\uC785\uB2C8\uB2E4.');
 
       const result = await loadSiteContent(token);
       const loadedContent = result.content as SiteContent;
 
       setContent(loadedContent);
       setSelectedAchievementTabId(loadedContent.achievements?.tabs?.[0]?.id || 'patents');
-      setStatusMessage('success', 'ííì´ì§ ë°ì´í°ë¥¼ ë¤ì ë¶ë¬ììµëë¤.');
+      setStatusMessage('success', '\uD648\uD398\uC774\uC9C0 \uB370\uC774\uD130\uB97C \uB2E4\uC2DC \uBD88\uB7EC\uC654\uC2B5\uB2C8\uB2E4.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : 'ë°ì´í°ë¥¼ ë¶ë¬ì¤ì§ ëª»íìµëë¤.');
+      setStatusMessage('error', error instanceof Error ? error.message : '\uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.');
     }
   }
 
   async function handleSave() {
     if (!content) {
-      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
+      setStatusMessage('error', '\uBA3C\uC800 \uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC640\uC8FC\uC138\uC694.');
       return;
     }
 
     try {
-      setStatusMessage('loading', 'ìì  ë´ì©ì GitHubì ì ì¥íë ì¤ìëë¤.');
+      setStatusMessage('loading', '\uC218\uC815 \uB0B4\uC6A9\uC744 GitHub\uC5D0 \uC800\uC7A5\uD558\uB294 \uC911\uC785\uB2C8\uB2E4.');
 
       await saveSiteContent(token, content);
-      setStatusMessage('success', 'ì ì¥ ìë£! Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤. ë³´íµ 1~2ë¶ ì ë ê±¸ë¦½ëë¤.');
+      setStatusMessage('success', '\uC800\uC7A5 \uC644\uB8CC! Cloudflare Pages\uAC00 \uC790\uB3D9\uC73C\uB85C \uB2E4\uC2DC \uBC30\uD3EC\uB429\uB2C8\uB2E4. \uBCF4\uD1B5 1~2\uBD84 \uC815\uB3C4 \uAC78\uB9BD\uB2C8\uB2E4.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : 'ì ì¥íì§ ëª»íìµëë¤.');
+      setStatusMessage('error', error instanceof Error ? error.message : '\uC800\uC7A5\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.');
     }
   }
 
   async function handleHeroImageUpload() {
     if (!content) {
-      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
+      setStatusMessage('error', '\uBA3C\uC800 \uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC640\uC8FC\uC138\uC694.');
       return;
     }
 
     if (selectedHeroImages.length === 0) {
-      setStatusMessage('error', 'ìë¡ëí  ë©ì¸ ëí ì´ë¯¸ì§ë¥¼ ì íí´ì£¼ì¸ì.');
+      setStatusMessage('error', '\uC5C5\uB85C\uB4DC\uD560 \uBA54\uC778 \uB300\uD45C \uC774\uBBF8\uC9C0\uB97C \uC120\uD0DD\uD574\uC8FC\uC138\uC694.');
       return;
     }
 
     if (heroImages.length + selectedHeroImages.length > MAX_HERO_IMAGES) {
       setStatusMessage(
         'error',
-        `ë©ì¸ ëí ì´ë¯¸ì§ë ìµë ${MAX_HERO_IMAGES}ì¥ê¹ì§ ë±ë¡í  ì ììµëë¤. íì¬ ${heroImages.length}ì¥ì´ ë±ë¡ëì´ ìì¼ë¯ë¡ ${MAX_HERO_IMAGES - heroImages.length}ì¥ê¹ì§ë§ ì¶ê°í  ì ììµëë¤.`
+        `\uBA54\uC778 \uB300\uD45C \uC774\uBBF8\uC9C0\uB294 \uCD5C\uB300 ${MAX_HERO_IMAGES}\uC7A5\uAE4C\uC9C0 \uB4F1\uB85D\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4. \uD604\uC7AC ${heroImages.length}\uC7A5\uC774 \uB4F1\uB85D\uB418\uC5B4 \uC788\uC73C\uBBC0\uB85C ${MAX_HERO_IMAGES - heroImages.length}\uC7A5\uAE4C\uC9C0\uB9CC \uCD94\uAC00\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.`
       );
       return;
     }
 
     try {
-      setStatusMessage('loading', 'ë©ì¸ ëí ì´ë¯¸ì§ë¥¼ GitHubì ìë¡ëíë ì¤ìëë¤.');
+      setStatusMessage('loading', '\uBA54\uC778 \uB300\uD45C \uC774\uBBF8\uC9C0\uB97C GitHub\uC5D0 \uC5C5\uB85C\uB4DC\uD558\uB294 \uC911\uC785\uB2C8\uB2E4.');
 
       const uploadedImagePaths: string[] = [];
       const nextPreviewUrls: Record<string, string> = {};
@@ -427,20 +427,20 @@ export default function Admin() {
         ...prev,
         ...nextPreviewUrls,
       }));
-      setStatusMessage('success', 'ë©ì¸ ëí ì´ë¯¸ì§ê° ì¶ê°ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
+      setStatusMessage('success', '\uBA54\uC778 \uB300\uD45C \uC774\uBBF8\uC9C0\uAC00 \uCD94\uAC00\uB418\uC5C8\uC2B5\uB2C8\uB2E4. Cloudflare Pages\uAC00 \uC790\uB3D9\uC73C\uB85C \uB2E4\uC2DC \uBC30\uD3EC\uB429\uB2C8\uB2E4.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : 'ë©ì¸ ëí ì´ë¯¸ì§ ìë¡ëì ì¤í¨íìµëë¤.');
+      setStatusMessage('error', error instanceof Error ? error.message : '\uBA54\uC778 \uB300\uD45C \uC774\uBBF8\uC9C0 \uC5C5\uB85C\uB4DC\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.');
     }
   }
 
   async function handleHeroImageDelete(imagePath: string) {
     if (!content) {
-      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
+      setStatusMessage('error', '\uBA3C\uC800 \uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC640\uC8FC\uC138\uC694.');
       return;
     }
 
     try {
-      setStatusMessage('loading', 'ë©ì¸ ëí ì´ë¯¸ì§ë¥¼ ì­ì íë ì¤ìëë¤.');
+      setStatusMessage('loading', '\uBA54\uC778 \uB300\uD45C \uC774\uBBF8\uC9C0\uB97C \uC0AD\uC81C\uD558\uB294 \uC911\uC785\uB2C8\uB2E4.');
 
       await deleteUploadedImage(token, imagePath);
 
@@ -464,20 +464,20 @@ export default function Admin() {
         delete nextPreviewUrls[imagePath];
         return nextPreviewUrls;
       });
-      setStatusMessage('success', 'ë©ì¸ ëí ì´ë¯¸ì§ê° ì­ì ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
+      setStatusMessage('success', '\uBA54\uC778 \uB300\uD45C \uC774\uBBF8\uC9C0\uAC00 \uC0AD\uC81C\uB418\uC5C8\uC2B5\uB2C8\uB2E4. Cloudflare Pages\uAC00 \uC790\uB3D9\uC73C\uB85C \uB2E4\uC2DC \uBC30\uD3EC\uB429\uB2C8\uB2E4.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : 'ë©ì¸ ëí ì´ë¯¸ì§ ì­ì ì ì¤í¨íìµëë¤.');
+      setStatusMessage('error', error instanceof Error ? error.message : '\uBA54\uC778 \uB300\uD45C \uC774\uBBF8\uC9C0 \uC0AD\uC81C\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.');
     }
   }
 
   async function handleAboutImageUpload() {
     if (!content) {
-      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
+      setStatusMessage('error', '\uBA3C\uC800 \uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC640\uC8FC\uC138\uC694.');
       return;
     }
 
     if (selectedAboutImages.length === 0) {
-      setStatusMessage('error', 'ìë¡ëí  íì¬ìê° ì´ë¯¸ì§ë¥¼ ì íí´ì£¼ì¸ì.');
+      setStatusMessage('error', '\uC5C5\uB85C\uB4DC\uD560 \uD68C\uC0AC\uC18C\uAC1C \uC774\uBBF8\uC9C0\uB97C \uC120\uD0DD\uD574\uC8FC\uC138\uC694.');
       return;
     }
 
@@ -486,13 +486,13 @@ export default function Admin() {
     if (currentImages.length + selectedAboutImages.length > MAX_ABOUT_IMAGES) {
       setStatusMessage(
         'error',
-        `íì¬ìê° ì´ë¯¸ì§ë ìµë ${MAX_ABOUT_IMAGES}ì¥ê¹ì§ ë±ë¡í  ì ììµëë¤. íì¬ ${currentImages.length}ì¥ì´ ë±ë¡ëì´ ìì¼ë¯ë¡ ${MAX_ABOUT_IMAGES - currentImages.length}ì¥ê¹ì§ë§ ì¶ê°í  ì ììµëë¤.`
+        `\uD68C\uC0AC\uC18C\uAC1C \uC774\uBBF8\uC9C0\uB294 \uCD5C\uB300 ${MAX_ABOUT_IMAGES}\uC7A5\uAE4C\uC9C0 \uB4F1\uB85D\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4. \uD604\uC7AC ${currentImages.length}\uC7A5\uC774 \uB4F1\uB85D\uB418\uC5B4 \uC788\uC73C\uBBC0\uB85C ${MAX_ABOUT_IMAGES - currentImages.length}\uC7A5\uAE4C\uC9C0\uB9CC \uCD94\uAC00\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.`
       );
       return;
     }
 
     try {
-      setStatusMessage('loading', 'íì¬ìê° ì´ë¯¸ì§ë¥¼ GitHubì ìë¡ëíë ì¤ìëë¤.');
+      setStatusMessage('loading', '\uD68C\uC0AC\uC18C\uAC1C \uC774\uBBF8\uC9C0\uB97C GitHub\uC5D0 \uC5C5\uB85C\uB4DC\uD558\uB294 \uC911\uC785\uB2C8\uB2E4.');
 
       const uploadedImagePaths: string[] = [];
       const nextPreviewUrls: Record<string, string> = {};
@@ -519,20 +519,20 @@ export default function Admin() {
         ...prev,
         ...nextPreviewUrls,
       }));
-      setStatusMessage('success', 'íì¬ìê° ì´ë¯¸ì§ê° ì¶ê°ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
+      setStatusMessage('success', '\uD68C\uC0AC\uC18C\uAC1C \uC774\uBBF8\uC9C0\uAC00 \uCD94\uAC00\uB418\uC5C8\uC2B5\uB2C8\uB2E4. Cloudflare Pages\uAC00 \uC790\uB3D9\uC73C\uB85C \uB2E4\uC2DC \uBC30\uD3EC\uB429\uB2C8\uB2E4.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : 'íì¬ìê° ì´ë¯¸ì§ ìë¡ëì ì¤í¨íìµëë¤.');
+      setStatusMessage('error', error instanceof Error ? error.message : '\uD68C\uC0AC\uC18C\uAC1C \uC774\uBBF8\uC9C0 \uC5C5\uB85C\uB4DC\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.');
     }
   }
 
   async function handleAboutImageDelete(imagePath: string) {
     if (!content) {
-      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
+      setStatusMessage('error', '\uBA3C\uC800 \uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC640\uC8FC\uC138\uC694.');
       return;
     }
 
     try {
-      setStatusMessage('loading', 'íì¬ìê° ì´ë¯¸ì§ë¥¼ ì­ì íë ì¤ìëë¤.');
+      setStatusMessage('loading', '\uD68C\uC0AC\uC18C\uAC1C \uC774\uBBF8\uC9C0\uB97C \uC0AD\uC81C\uD558\uB294 \uC911\uC785\uB2C8\uB2E4.');
 
       await deleteUploadedImage(token, imagePath);
 
@@ -552,20 +552,20 @@ export default function Admin() {
         delete nextPreviewUrls[imagePath];
         return nextPreviewUrls;
       });
-      setStatusMessage('success', 'íì¬ìê° ì´ë¯¸ì§ê° ì­ì ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
+      setStatusMessage('success', '\uD68C\uC0AC\uC18C\uAC1C \uC774\uBBF8\uC9C0\uAC00 \uC0AD\uC81C\uB418\uC5C8\uC2B5\uB2C8\uB2E4. Cloudflare Pages\uAC00 \uC790\uB3D9\uC73C\uB85C \uB2E4\uC2DC \uBC30\uD3EC\uB429\uB2C8\uB2E4.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : 'íì¬ìê° ì´ë¯¸ì§ ì­ì ì ì¤í¨íìµëë¤.');
+      setStatusMessage('error', error instanceof Error ? error.message : '\uD68C\uC0AC\uC18C\uAC1C \uC774\uBBF8\uC9C0 \uC0AD\uC81C\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.');
     }
   }
 
   async function handleServiceImageUpload() {
     if (!content) {
-      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
+      setStatusMessage('error', '\uBA3C\uC800 \uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC640\uC8FC\uC138\uC694.');
       return;
     }
 
     if (selectedServiceImages.length === 0) {
-      setStatusMessage('error', 'ìë¡ëí  ì¬ì ë¶ì¼ ì´ë¯¸ì§ë¥¼ ì íí´ì£¼ì¸ì.');
+      setStatusMessage('error', '\uC5C5\uB85C\uB4DC\uD560 \uC0AC\uC5C5 \uBD84\uC57C \uC774\uBBF8\uC9C0\uB97C \uC120\uD0DD\uD574\uC8FC\uC138\uC694.');
       return;
     }
 
@@ -574,13 +574,13 @@ export default function Admin() {
     if (currentImages.length + selectedServiceImages.length > MAX_SERVICE_IMAGES) {
       setStatusMessage(
         'error',
-        `ì¬ì ë¶ì¼ ì´ë¯¸ì§ë ìµë ${MAX_SERVICE_IMAGES}ì¥ê¹ì§ ë±ë¡í  ì ììµëë¤. íì¬ ${currentImages.length}ì¥ì´ ë±ë¡ëì´ ìì¼ë¯ë¡ ${MAX_SERVICE_IMAGES - currentImages.length}ì¥ê¹ì§ë§ ì¶ê°í  ì ììµëë¤.`
+        `\uC0AC\uC5C5 \uBD84\uC57C \uC774\uBBF8\uC9C0\uB294 \uCD5C\uB300 ${MAX_SERVICE_IMAGES}\uC7A5\uAE4C\uC9C0 \uB4F1\uB85D\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4. \uD604\uC7AC ${currentImages.length}\uC7A5\uC774 \uB4F1\uB85D\uB418\uC5B4 \uC788\uC73C\uBBC0\uB85C ${MAX_SERVICE_IMAGES - currentImages.length}\uC7A5\uAE4C\uC9C0\uB9CC \uCD94\uAC00\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.`
       );
       return;
     }
 
     try {
-      setStatusMessage('loading', 'ì¬ì ë¶ì¼ ì´ë¯¸ì§ë¥¼ GitHubì ìë¡ëíë ì¤ìëë¤.');
+      setStatusMessage('loading', '\uC0AC\uC5C5 \uBD84\uC57C \uC774\uBBF8\uC9C0\uB97C GitHub\uC5D0 \uC5C5\uB85C\uB4DC\uD558\uB294 \uC911\uC785\uB2C8\uB2E4.');
 
       const uploadedImagePaths: string[] = [];
       const nextPreviewUrls: Record<string, string> = {};
@@ -608,20 +608,20 @@ export default function Admin() {
         ...prev,
         ...nextPreviewUrls,
       }));
-      setStatusMessage('success', 'ì¬ì ë¶ì¼ ì´ë¯¸ì§ê° ì¶ê°ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
+      setStatusMessage('success', '\uC0AC\uC5C5 \uBD84\uC57C \uC774\uBBF8\uC9C0\uAC00 \uCD94\uAC00\uB418\uC5C8\uC2B5\uB2C8\uB2E4. Cloudflare Pages\uAC00 \uC790\uB3D9\uC73C\uB85C \uB2E4\uC2DC \uBC30\uD3EC\uB429\uB2C8\uB2E4.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : 'ì¬ì ë¶ì¼ ì´ë¯¸ì§ ìë¡ëì ì¤í¨íìµëë¤.');
+      setStatusMessage('error', error instanceof Error ? error.message : '\uC0AC\uC5C5 \uBD84\uC57C \uC774\uBBF8\uC9C0 \uC5C5\uB85C\uB4DC\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.');
     }
   }
 
   async function handleServiceImageDelete(imagePath: string) {
     if (!content) {
-      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
+      setStatusMessage('error', '\uBA3C\uC800 \uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC640\uC8FC\uC138\uC694.');
       return;
     }
 
     try {
-      setStatusMessage('loading', 'ì¬ì ë¶ì¼ ì´ë¯¸ì§ë¥¼ ì­ì íë ì¤ìëë¤.');
+      setStatusMessage('loading', '\uC0AC\uC5C5 \uBD84\uC57C \uC774\uBBF8\uC9C0\uB97C \uC0AD\uC81C\uD558\uB294 \uC911\uC785\uB2C8\uB2E4.');
 
       await deleteUploadedImage(token, imagePath);
 
@@ -642,30 +642,30 @@ export default function Admin() {
         delete nextPreviewUrls[imagePath];
         return nextPreviewUrls;
       });
-      setStatusMessage('success', 'ì¬ì ë¶ì¼ ì´ë¯¸ì§ê° ì­ì ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
+      setStatusMessage('success', '\uC0AC\uC5C5 \uBD84\uC57C \uC774\uBBF8\uC9C0\uAC00 \uC0AD\uC81C\uB418\uC5C8\uC2B5\uB2C8\uB2E4. Cloudflare Pages\uAC00 \uC790\uB3D9\uC73C\uB85C \uB2E4\uC2DC \uBC30\uD3EC\uB429\uB2C8\uB2E4.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : 'ì¬ì ë¶ì¼ ì´ë¯¸ì§ ì­ì ì ì¤í¨íìµëë¤.');
+      setStatusMessage('error', error instanceof Error ? error.message : '\uC0AC\uC5C5 \uBD84\uC57C \uC774\uBBF8\uC9C0 \uC0AD\uC81C\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.');
     }
   }
 
   async function handleAchievementImageUpload() {
     if (!content) {
-      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
+      setStatusMessage('error', '\uBA3C\uC800 \uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC640\uC8FC\uC138\uC694.');
       return;
     }
 
     if (!activeAchievementTab) {
-      setStatusMessage('error', 'ì´ë¯¸ì§ë¥¼ ë±ë¡í  ë¶ë¥ë¥¼ ì°¾ì ì ììµëë¤.');
+      setStatusMessage('error', '\uC774\uBBF8\uC9C0\uB97C \uB4F1\uB85D\uD560 \uBD84\uB958\uB97C \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.');
       return;
     }
 
     if (selectedAchievementImages.length === 0) {
-      setStatusMessage('error', 'ìë¡ëí  ì¸ì¦ ìë£ ì´ë¯¸ì§ë¥¼ ì íí´ì£¼ì¸ì.');
+      setStatusMessage('error', '\uC5C5\uB85C\uB4DC\uD560 \uC778\uC99D \uC790\uB8CC \uC774\uBBF8\uC9C0\uB97C \uC120\uD0DD\uD574\uC8FC\uC138\uC694.');
       return;
     }
 
     try {
-      setStatusMessage('loading', `${activeAchievementTab.label} ì´ë¯¸ì§ë¥¼ GitHubì ìë¡ëíë ì¤ìëë¤.`);
+      setStatusMessage('loading', `${activeAchievementTab.label} \uC774\uBBF8\uC9C0\uB97C GitHub\uC5D0 \uC5C5\uB85C\uB4DC\uD558\uB294 \uC911\uC785\uB2C8\uB2E4.`);
 
       const uploadedImagePaths: string[] = [];
       const nextPreviewUrls: Record<string, string> = {};
@@ -704,20 +704,20 @@ export default function Admin() {
         ...prev,
         ...nextPreviewUrls,
       }));
-      setStatusMessage('success', `${activeAchievementTab.label} ì´ë¯¸ì§ê° ì¶ê°ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.`);
+      setStatusMessage('success', `${activeAchievementTab.label} \uC774\uBBF8\uC9C0\uAC00 \uCD94\uAC00\uB418\uC5C8\uC2B5\uB2C8\uB2E4. Cloudflare Pages\uAC00 \uC790\uB3D9\uC73C\uB85C \uB2E4\uC2DC \uBC30\uD3EC\uB429\uB2C8\uB2E4.`);
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : 'ì¸ì¦ ìë£ ì´ë¯¸ì§ ìë¡ëì ì¤í¨íìµëë¤.');
+      setStatusMessage('error', error instanceof Error ? error.message : '\uC778\uC99D \uC790\uB8CC \uC774\uBBF8\uC9C0 \uC5C5\uB85C\uB4DC\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.');
     }
   }
 
   async function handleAchievementImageDelete(tabId: string, imagePath: string) {
     if (!content) {
-      setStatusMessage('error', 'ë¨¼ì  ë°ì´í°ë¥¼ ë¶ë¬ìì£¼ì¸ì.');
+      setStatusMessage('error', '\uBA3C\uC800 \uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC640\uC8FC\uC138\uC694.');
       return;
     }
 
     try {
-      setStatusMessage('loading', 'ì¸ì¦ ìë£ ì´ë¯¸ì§ë¥¼ ì­ì íë ì¤ìëë¤.');
+      setStatusMessage('loading', '\uC778\uC99D \uC790\uB8CC \uC774\uBBF8\uC9C0\uB97C \uC0AD\uC81C\uD558\uB294 \uC911\uC785\uB2C8\uB2E4.');
 
       await deleteUploadedImage(token, imagePath);
 
@@ -744,9 +744,9 @@ export default function Admin() {
         delete nextPreviewUrls[imagePath];
         return nextPreviewUrls;
       });
-      setStatusMessage('success', 'ì¸ì¦ ìë£ ì´ë¯¸ì§ê° ì­ì ëììµëë¤. Cloudflare Pagesê° ìëì¼ë¡ ë¤ì ë°°í¬ë©ëë¤.');
+      setStatusMessage('success', '\uC778\uC99D \uC790\uB8CC \uC774\uBBF8\uC9C0\uAC00 \uC0AD\uC81C\uB418\uC5C8\uC2B5\uB2C8\uB2E4. Cloudflare Pages\uAC00 \uC790\uB3D9\uC73C\uB85C \uB2E4\uC2DC \uBC30\uD3EC\uB429\uB2C8\uB2E4.');
     } catch (error) {
-      setStatusMessage('error', error instanceof Error ? error.message : 'ì¸ì¦ ìë£ ì´ë¯¸ì§ ì­ì ì ì¤í¨íìµëë¤.');
+      setStatusMessage('error', error instanceof Error ? error.message : '\uC778\uC99D \uC790\uB8CC \uC774\uBBF8\uC9C0 \uC0AD\uC81C\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.');
     }
   }
 
@@ -959,9 +959,9 @@ export default function Admin() {
           </div>
 
           <div className="text-center">
-            <h1 className="text-2xl font-black tracking-tight">Admin CMS ì ì</h1>
+            <h1 className="text-2xl font-black tracking-tight">Admin CMS &#xC811;&#xC18D;</h1>
             <p className="mt-3 text-sm text-slate-300">
-              GitHub Personal Access Tokenì´ íìí©ëë¤.
+              GitHub Personal Access Token&#xC774; &#xD544;&#xC694;&#xD569;&#xB2C8;&#xB2E4;.
             </p>
           </div>
 
@@ -1009,7 +1009,7 @@ export default function Admin() {
                 onChange={(event) => setRememberToken(event.target.checked)}
                 className="h-4 w-4 rounded border-white/20 bg-zinc-900"
               />
-              ì´ ê¸°ê¸°ì í í° ìì ì ì¥
+              &#xC774; &#xAE30;&#xAE30;&#xC5D0; &#xD1A0;&#xD070; &#xC784;&#xC2DC; &#xC800;&#xC7A5;
             </label>
 
             {message && (
@@ -1033,14 +1033,14 @@ export default function Admin() {
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-4 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Github size={18} />}
-              ì¸ì¦ ë° ì ì
+              &#xC778;&#xC99D; &#xBC0F; &#xC811;&#xC18D;
             </button>
 
             <a
               href="/"
               className="block text-center text-xs font-bold text-slate-300 transition hover:text-white"
             >
-              íì¼ë¡ ëìê°ê¸°
+              &#xD648;&#xC73C;&#xB85C; &#xB3CC;&#xC544;&#xAC00;&#xAE30;
             </a>
           </div>
         </div>
@@ -1055,9 +1055,9 @@ export default function Admin() {
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-400">Admin Page</p>
-              <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">ë¯¼ìì ë° ê´ë¦¬ì íì´ì§</h1>
+              <h1 className="mt-3 text-3xl font-black tracking-tight md:text-5xl">&#xBBFC;&#xC601;&#xC815;&#xBC00; &#xAD00;&#xB9AC;&#xC790; &#xD398;&#xC774;&#xC9C0;</h1>
               <p className="mt-4 max-w-2xl text-slate-300">
-                ííì´ì§ ë¬¸êµ¬ì íì¬ ì ë³´ë¥¼ ìì í ë¤ GitHubì ì ì¥í©ëë¤. ì ì¥ í Cloudflare Pagesê° ìëì¼ë¡ ì¬ë°°í¬í©ëë¤.
+                &#xD648;&#xD398;&#xC774;&#xC9C0; &#xBB38;&#xAD6C;&#xC640; &#xD68C;&#xC0AC; &#xC815;&#xBCF4;&#xB97C; &#xC218;&#xC815;&#xD55C; &#xB4A4; GitHub&#xC5D0; &#xC800;&#xC7A5;&#xD569;&#xB2C8;&#xB2E4;. &#xC800;&#xC7A5; &#xD6C4; Cloudflare Pages&#xAC00; &#xC790;&#xB3D9;&#xC73C;&#xB85C; &#xC7AC;&#xBC30;&#xD3EC;&#xD569;&#xB2C8;&#xB2E4;.
               </p>
             </div>
 
@@ -1066,7 +1066,7 @@ export default function Admin() {
                 href="/"
                 className="inline-flex items-center justify-center rounded-xl border border-white/20 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
               >
-                ííì´ì§ë¡ ëìê°ê¸°
+                &#xD648;&#xD398;&#xC774;&#xC9C0;&#xB85C; &#xB3CC;&#xC544;&#xAC00;&#xAE30;
               </a>
 
               <button
@@ -1075,7 +1075,7 @@ export default function Admin() {
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-100"
               >
                 <LogOut size={16} />
-                ë¡ê·¸ìì
+                &#xB85C;&#xADF8;&#xC544;&#xC6C3;
               </button>
             </div>
           </div>
@@ -1086,7 +1086,7 @@ export default function Admin() {
         <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-bold text-slate-900">ì°ê²°ë ì ì¥ì</p>
+              <p className="text-sm font-bold text-slate-900">&#xC5F0;&#xACB0;&#xB41C; &#xC800;&#xC7A5;&#xC18C;</p>
               <p className="mt-1 text-sm text-slate-500">
                 {repositoryLabel} / {githubContentConfig.path}
               </p>
@@ -1100,7 +1100,7 @@ export default function Admin() {
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
-                ë°ì´í° ìë¡ê³ ì¹¨
+                &#xB370;&#xC774;&#xD130; &#xC0C8;&#xB85C;&#xACE0;&#xCE68;
               </button>
 
               <button
@@ -1110,7 +1110,7 @@ export default function Admin() {
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                ì ì¥íê¸°
+                &#xC800;&#xC7A5;&#xD558;&#xAE30;
               </button>
             </div>
           </div>
@@ -1141,22 +1141,22 @@ export default function Admin() {
         {!content ? (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
             <ListChecks size={42} className="mx-auto text-slate-400" />
-            <h2 className="mt-4 text-xl font-bold text-slate-900">ë°ì´í°ë¥¼ ë¶ë¬ì¤ë ì¤ìëë¤.</h2>
+            <h2 className="mt-4 text-xl font-bold text-slate-900">&#xB370;&#xC774;&#xD130;&#xB97C; &#xBD88;&#xB7EC;&#xC624;&#xB294; &#xC911;&#xC785;&#xB2C8;&#xB2E4;.</h2>
           </div>
         ) : (
           <div className="space-y-6">
             <AdminSection
-              title="ë©ì¸ ëí ì´ë¯¸ì§ ì¬ë¼ì´ë"
-              description={`ííì´ì§ ì²« íë©´ì ëí ì´ë¯¸ì§ë¥¼ ê´ë¦¬í©ëë¤. ìµë ${MAX_HERO_IMAGES}ì¥ê¹ì§ ë±ë¡í  ì ìì¼ë©°, ì¬ë¬ ì¥ì´ë©´ ìëì¼ë¡ ì íë©ëë¤.`}
+              title="\uBA54\uC778 \uB300\uD45C \uC774\uBBF8\uC9C0 \uC2AC\uB77C\uC774\uB4DC"
+              description={`\uD648\uD398\uC774\uC9C0 \uCCAB \uD654\uBA74\uC758 \uB300\uD45C \uC774\uBBF8\uC9C0\uB97C \uAD00\uB9AC\uD569\uB2C8\uB2E4. \uCD5C\uB300 ${MAX_HERO_IMAGES}\uC7A5\uAE4C\uC9C0 \uB4F1\uB85D\uD560 \uC218 \uC788\uC73C\uBA70, \uC5EC\uB7EC \uC7A5\uC774\uBA74 \uC790\uB3D9\uC73C\uB85C \uC804\uD658\uB429\uB2C8\uB2E4.`}
             >
               <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                   <div className="flex items-center gap-3 text-slate-900">
                     <ImagePlus size={22} className="text-blue-600" />
                     <div>
-                      <h3 className="font-bold">ë©ì¸ ëí ì´ë¯¸ì§ ì¶ê°</h3>
+                      <h3 className="font-bold">&#xBA54;&#xC778; &#xB300;&#xD45C; &#xC774;&#xBBF8;&#xC9C0; &#xCD94;&#xAC00;</h3>
                       <p className="mt-1 text-sm text-slate-500">
-                        JPG, PNG, WEBP, GIF íì¼ì ì¬ì©í  ì ììµëë¤. íì¬ {heroImages.length}/{MAX_HERO_IMAGES}ì¥ ë±ë¡ëì´ ììµëë¤.
+                        JPG, PNG, WEBP, GIF &#xD30C;&#xC77C;&#xC744; &#xC0AC;&#xC6A9;&#xD560; &#xC218; &#xC788;&#xC2B5;&#xB2C8;&#xB2E4;. &#xD604;&#xC7AC; {heroImages.length}/{MAX_HERO_IMAGES}&#xC7A5; &#xB4F1;&#xB85D;&#xB418;&#xC5B4; &#xC788;&#xC2B5;&#xB2C8;&#xB2E4;.
                       </p>
                     </div>
                   </div>
@@ -1173,7 +1173,7 @@ export default function Admin() {
                     {selectedHeroImages.length > 0 && (
                       <div className="mt-3 rounded-xl bg-white p-3 text-sm text-slate-600">
                         <p className="font-bold text-slate-800">
-                          ì íë íì¼ {selectedHeroImages.length}ê°
+                          &#xC120;&#xD0DD;&#xB41C; &#xD30C;&#xC77C; {selectedHeroImages.length}&#xAC1C;
                         </p>
 
                         <ul className="mt-2 max-h-36 space-y-1 overflow-auto pr-1">
@@ -1194,12 +1194,12 @@ export default function Admin() {
                     className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
-                    ë©ì¸ ëí ì´ë¯¸ì§ ì¶ê°
+                    &#xBA54;&#xC778; &#xB300;&#xD45C; &#xC774;&#xBBF8;&#xC9C0; &#xCD94;&#xAC00;
                   </button>
 
                   <div className="mt-5">
                     <TextInput
-                      label="ë©ì¸ ì´ë¯¸ì§ ì í ìê°(ms)"
+                      label="\uBA54\uC778 \uC774\uBBF8\uC9C0 \uC804\uD658 \uC2DC\uAC04(ms)"
                       value={String(content.hero.slideIntervalMs || 4500)}
                       onChange={(value) => updateHero('slideIntervalMs', Number(value) || 4500)}
                     />
@@ -1207,7 +1207,7 @@ export default function Admin() {
                 </div>
 
                 <div>
-                  <p className="mb-2 text-sm font-bold text-slate-700">ë±ë¡ë ë©ì¸ ëí ì´ë¯¸ì§</p>
+                  <p className="mb-2 text-sm font-bold text-slate-700">&#xB4F1;&#xB85D;&#xB41C; &#xBA54;&#xC778; &#xB300;&#xD45C; &#xC774;&#xBBF8;&#xC9C0;</p>
 
                   {heroImages.length > 0 ? (
                     <div className="space-y-4">
@@ -1215,7 +1215,7 @@ export default function Admin() {
                         <div key={`${image}-${index}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
                           <img
                             src={heroImagePreviewUrls[image] || image}
-                            alt={`ë©ì¸ ëí ì´ë¯¸ì§ ${index + 1}`}
+                            alt={`\uBA54\uC778 \uB300\uD45C \uC774\uBBF8\uC9C0 ${index + 1}`}
                             className="h-40 w-full object-cover"
                             onError={(event) => {
                               event.currentTarget.style.display = 'none';
@@ -1225,11 +1225,11 @@ export default function Admin() {
                           <div className="space-y-3 border-t border-slate-200 p-4">
                             <div className="flex items-center justify-between gap-3">
                               <p className="text-xs font-bold text-slate-700">
-                                {index === 0 ? 'ëí 1ë² ì´ë¯¸ì§' : `ì¬ë¼ì´ë ì´ë¯¸ì§ ${index + 1}`}
+                                {index === 0 ? '\uB300\uD45C 1\uBC88 \uC774\uBBF8\uC9C0' : `\uC2AC\uB77C\uC774\uB4DC \uC774\uBBF8\uC9C0 ${index + 1}`}
                               </p>
                               {index === 0 && (
                                 <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
-                                  ê¸°ë³¸ ëí
+                                  &#xAE30;&#xBCF8; &#xB300;&#xD45C;
                                 </span>
                               )}
                             </div>
@@ -1243,7 +1243,7 @@ export default function Admin() {
                               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               {isBusy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                              ì´ ì´ë¯¸ì§ ì­ì 
+                              &#xC774; &#xC774;&#xBBF8;&#xC9C0; &#xC0AD;&#xC81C;
                             </button>
                           </div>
                         </div>
@@ -1251,8 +1251,8 @@ export default function Admin() {
                     </div>
                   ) : (
                     <EmptyImageBox
-                      text="ë±ë¡ë ë©ì¸ ëí ì´ë¯¸ì§ê° ììµëë¤."
-                      subText="ì´ë¯¸ì§ê° ìì¼ë©´ ê¸°ë³¸ ë¤í¬ ë°°ê²½ì´ íìë©ëë¤."
+                      text="\uB4F1\uB85D\uB41C \uBA54\uC778 \uB300\uD45C \uC774\uBBF8\uC9C0\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4."
+                      subText="\uC774\uBBF8\uC9C0\uAC00 \uC5C6\uC73C\uBA74 \uAE30\uBCF8 \uB2E4\uD06C \uBC30\uACBD\uC774 \uD45C\uC2DC\uB429\uB2C8\uB2E4."
                     />
                   )}
                 </div>
@@ -1260,17 +1260,17 @@ export default function Admin() {
             </AdminSection>
 
             <AdminSection
-              title="íì¬ìê° ì¬ë¼ì´ë ì´ë¯¸ì§"
-              description={`íì¬ìê° ì¤ë¥¸ìª½ ìì­ì íìë  ì´ë¯¸ì§ë¥¼ ê´ë¦¬í©ëë¤. ìµë ${MAX_ABOUT_IMAGES}ì¥ê¹ì§ ë±ë¡í  ì ìì¼ë©°, ì¬ë¬ ì¥ì´ë©´ ìëì¼ë¡ ì íë©ëë¤.`}
+              title="\uD68C\uC0AC\uC18C\uAC1C \uC2AC\uB77C\uC774\uB4DC \uC774\uBBF8\uC9C0"
+              description={`\uD68C\uC0AC\uC18C\uAC1C \uC624\uB978\uCABD \uC601\uC5ED\uC5D0 \uD45C\uC2DC\uB420 \uC774\uBBF8\uC9C0\uB97C \uAD00\uB9AC\uD569\uB2C8\uB2E4. \uCD5C\uB300 ${MAX_ABOUT_IMAGES}\uC7A5\uAE4C\uC9C0 \uB4F1\uB85D\uD560 \uC218 \uC788\uC73C\uBA70, \uC5EC\uB7EC \uC7A5\uC774\uBA74 \uC790\uB3D9\uC73C\uB85C \uC804\uD658\uB429\uB2C8\uB2E4.`}
             >
               <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                   <div className="flex items-center gap-3 text-slate-900">
                     <ImagePlus size={22} className="text-blue-600" />
                     <div>
-                      <h3 className="font-bold">íì¬ìê° ì´ë¯¸ì§ ì¶ê°</h3>
+                      <h3 className="font-bold">&#xD68C;&#xC0AC;&#xC18C;&#xAC1C; &#xC774;&#xBBF8;&#xC9C0; &#xCD94;&#xAC00;</h3>
                       <p className="mt-1 text-sm text-slate-500">
-                        JPG, PNG, WEBP, GIF íì¼ì ì¬ì©í  ì ììµëë¤. íì¬ {aboutImages.length}/{MAX_ABOUT_IMAGES}ì¥ ë±ë¡ëì´ ììµëë¤.
+                        JPG, PNG, WEBP, GIF &#xD30C;&#xC77C;&#xC744; &#xC0AC;&#xC6A9;&#xD560; &#xC218; &#xC788;&#xC2B5;&#xB2C8;&#xB2E4;. &#xD604;&#xC7AC; {aboutImages.length}/{MAX_ABOUT_IMAGES}&#xC7A5; &#xB4F1;&#xB85D;&#xB418;&#xC5B4; &#xC788;&#xC2B5;&#xB2C8;&#xB2E4;.
                       </p>
                     </div>
                   </div>
@@ -1287,7 +1287,7 @@ export default function Admin() {
                     {selectedAboutImages.length > 0 && (
                       <div className="mt-3 rounded-xl bg-white p-3 text-sm text-slate-600">
                         <p className="font-bold text-slate-800">
-                          ì íë íì¼ {selectedAboutImages.length}ê°
+                          &#xC120;&#xD0DD;&#xB41C; &#xD30C;&#xC77C; {selectedAboutImages.length}&#xAC1C;
                         </p>
 
                         <ul className="mt-2 space-y-1">
@@ -1309,13 +1309,13 @@ export default function Admin() {
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
-                      íì¬ìê° ì´ë¯¸ì§ ì¶ê°
+                      &#xD68C;&#xC0AC;&#xC18C;&#xAC1C; &#xC774;&#xBBF8;&#xC9C0; &#xCD94;&#xAC00;
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <p className="mb-2 text-sm font-bold text-slate-700">ë±ë¡ë íì¬ìê° ì´ë¯¸ì§</p>
+                  <p className="mb-2 text-sm font-bold text-slate-700">&#xB4F1;&#xB85D;&#xB41C; &#xD68C;&#xC0AC;&#xC18C;&#xAC1C; &#xC774;&#xBBF8;&#xC9C0;</p>
 
                   {aboutImages.length > 0 ? (
                     <div className="space-y-4">
@@ -1323,7 +1323,7 @@ export default function Admin() {
                         <div key={`${image}-${index}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
                           <img
                             src={aboutImagePreviewUrls[image] || image}
-                            alt={`íì¬ìê° ì´ë¯¸ì§ ${index + 1}`}
+                            alt={`\uD68C\uC0AC\uC18C\uAC1C \uC774\uBBF8\uC9C0 ${index + 1}`}
                             className="h-40 w-full object-cover"
                             onError={(event) => {
                               event.currentTarget.style.display = 'none';
@@ -1340,7 +1340,7 @@ export default function Admin() {
                               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               {isBusy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                              ì´ ì´ë¯¸ì§ ì­ì 
+                              &#xC774; &#xC774;&#xBBF8;&#xC9C0; &#xC0AD;&#xC81C;
                             </button>
                           </div>
                         </div>
@@ -1348,8 +1348,8 @@ export default function Admin() {
                     </div>
                   ) : (
                     <EmptyImageBox
-                      text="ë±ë¡ë íì¬ìê° ì´ë¯¸ì§ê° ììµëë¤."
-                      subText="ì´ë¯¸ì§ê° ìì¼ë©´ ê¸°ì¡´ MIN YOUNG ì¹´ëê° íìë©ëë¤."
+                      text="\uB4F1\uB85D\uB41C \uD68C\uC0AC\uC18C\uAC1C \uC774\uBBF8\uC9C0\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4."
+                      subText="\uC774\uBBF8\uC9C0\uAC00 \uC5C6\uC73C\uBA74 \uAE30\uC874 MIN YOUNG \uCE74\uB4DC\uAC00 \uD45C\uC2DC\uB429\uB2C8\uB2E4."
                     />
                   )}
                 </div>
@@ -1357,17 +1357,17 @@ export default function Admin() {
             </AdminSection>
 
             <AdminSection
-              title="ì¬ì ë¶ì¼ ì¬ë¼ì´ë ì´ë¯¸ì§"
-              description={`ì£¼ì ì¬ì ë¶ì¼ ì¹ì ì¼ìª½ì íìë  ì´ë¯¸ì§ë¥¼ ê´ë¦¬í©ëë¤. ìµë ${MAX_SERVICE_IMAGES}ì¥ê¹ì§ ë±ë¡í  ì ììµëë¤.`}
+              title="\uC0AC\uC5C5 \uBD84\uC57C \uC2AC\uB77C\uC774\uB4DC \uC774\uBBF8\uC9C0"
+              description={`\uC8FC\uC694 \uC0AC\uC5C5 \uBD84\uC57C \uC139\uC158 \uC67C\uCABD\uC5D0 \uD45C\uC2DC\uB420 \uC774\uBBF8\uC9C0\uB97C \uAD00\uB9AC\uD569\uB2C8\uB2E4. \uCD5C\uB300 ${MAX_SERVICE_IMAGES}\uC7A5\uAE4C\uC9C0 \uB4F1\uB85D\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.`}
             >
               <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                   <div className="flex items-center gap-3 text-slate-900">
                     <ImagePlus size={22} className="text-blue-600" />
                     <div>
-                      <h3 className="font-bold">ì¬ì ë¶ì¼ ì´ë¯¸ì§ ì¶ê°</h3>
+                      <h3 className="font-bold">&#xC0AC;&#xC5C5; &#xBD84;&#xC57C; &#xC774;&#xBBF8;&#xC9C0; &#xCD94;&#xAC00;</h3>
                       <p className="mt-1 text-sm text-slate-500">
-                        JPG, PNG, WEBP, GIF íì¼ì ì¬ì©í  ì ììµëë¤. íì¬ {serviceImages.length}/{MAX_SERVICE_IMAGES}ì¥ ë±ë¡ëì´ ììµëë¤.
+                        JPG, PNG, WEBP, GIF &#xD30C;&#xC77C;&#xC744; &#xC0AC;&#xC6A9;&#xD560; &#xC218; &#xC788;&#xC2B5;&#xB2C8;&#xB2E4;. &#xD604;&#xC7AC; {serviceImages.length}/{MAX_SERVICE_IMAGES}&#xC7A5; &#xB4F1;&#xB85D;&#xB418;&#xC5B4; &#xC788;&#xC2B5;&#xB2C8;&#xB2E4;.
                       </p>
                     </div>
                   </div>
@@ -1384,7 +1384,7 @@ export default function Admin() {
                     {selectedServiceImages.length > 0 && (
                       <div className="mt-3 rounded-xl bg-white p-3 text-sm text-slate-600">
                         <p className="font-bold text-slate-800">
-                          ì íë íì¼ {selectedServiceImages.length}ê°
+                          &#xC120;&#xD0DD;&#xB41C; &#xD30C;&#xC77C; {selectedServiceImages.length}&#xAC1C;
                         </p>
 
                         <ul className="mt-2 max-h-36 space-y-1 overflow-auto pr-1">
@@ -1405,12 +1405,12 @@ export default function Admin() {
                     className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
-                    ì¬ì ë¶ì¼ ì´ë¯¸ì§ ì¶ê°
+                    &#xC0AC;&#xC5C5; &#xBD84;&#xC57C; &#xC774;&#xBBF8;&#xC9C0; &#xCD94;&#xAC00;
                   </button>
 
                   <div className="mt-5">
                     <TextInput
-                      label="ì¬ì ë¶ì¼ ì´ë¯¸ì§ ì í ìê°(ms)"
+                      label="\uC0AC\uC5C5 \uBD84\uC57C \uC774\uBBF8\uC9C0 \uC804\uD658 \uC2DC\uAC04(ms)"
                       value={String(content.services.slideIntervalMs || 4000)}
                       onChange={(value) => updateServices('slideIntervalMs', Number(value) || 4000)}
                     />
@@ -1418,7 +1418,7 @@ export default function Admin() {
                 </div>
 
                 <div>
-                  <p className="mb-2 text-sm font-bold text-slate-700">ë±ë¡ë ì¬ì ë¶ì¼ ì´ë¯¸ì§</p>
+                  <p className="mb-2 text-sm font-bold text-slate-700">&#xB4F1;&#xB85D;&#xB41C; &#xC0AC;&#xC5C5; &#xBD84;&#xC57C; &#xC774;&#xBBF8;&#xC9C0;</p>
 
                   {serviceImages.length > 0 ? (
                     <div className="space-y-4">
@@ -1426,7 +1426,7 @@ export default function Admin() {
                         <div key={`${image}-${index}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
                           <img
                             src={serviceImagePreviewUrls[image] || image}
-                            alt={`ì¬ì ë¶ì¼ ì´ë¯¸ì§ ${index + 1}`}
+                            alt={`\uC0AC\uC5C5 \uBD84\uC57C \uC774\uBBF8\uC9C0 ${index + 1}`}
                             className="h-40 w-full object-cover"
                             onError={(event) => {
                               event.currentTarget.style.display = 'none';
@@ -1443,7 +1443,7 @@ export default function Admin() {
                               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               {isBusy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                              ì´ ì´ë¯¸ì§ ì­ì 
+                              &#xC774; &#xC774;&#xBBF8;&#xC9C0; &#xC0AD;&#xC81C;
                             </button>
                           </div>
                         </div>
@@ -1451,8 +1451,8 @@ export default function Admin() {
                     </div>
                   ) : (
                     <EmptyImageBox
-                      text="ë±ë¡ë ì¬ì ë¶ì¼ ì´ë¯¸ì§ê° ììµëë¤."
-                      subText="ì´ë¯¸ì§ê° ìì¼ë©´ ê¸°ë³¸ ìë´ ë°ì¤ê° íìë©ëë¤."
+                      text="\uB4F1\uB85D\uB41C \uC0AC\uC5C5 \uBD84\uC57C \uC774\uBBF8\uC9C0\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4."
+                      subText="\uC774\uBBF8\uC9C0\uAC00 \uC5C6\uC73C\uBA74 \uAE30\uBCF8 \uC548\uB0B4 \uBC15\uC2A4\uAC00 \uD45C\uC2DC\uB429\uB2C8\uB2E4."
                     />
                   )}
                 </div>
@@ -1460,8 +1460,8 @@ export default function Admin() {
             </AdminSection>
 
             <AdminSection
-              title="ì¸ì¦ì Â· ìí¨ Â· í¹í ìë£ ê´ë¦¬"
-              description="ííì´ì§ìë í­ ìì´ ëª¨ë  ì´ë¯¸ì§ê° íëì ë³´ì´ë ê°¤ë¬ë¦¬ë¡ íìë©ëë¤. ì¬ê¸°ìë ë¶ë¥ë³ë¡ ìë¡ëíê³  ì­ì ë§ ì½ê² ê´ë¦¬í©ëë¤."
+              title="\uC778\uC99D\uC11C \u00B7 \uC0C1\uD328 \u00B7 \uD2B9\uD5C8 \uC790\uB8CC \uAD00\uB9AC"
+              description="\uD648\uD398\uC774\uC9C0\uC5D0\uB294 \uD0ED \uC5C6\uC774 \uBAA8\uB4E0 \uC774\uBBF8\uC9C0\uAC00 \uD55C\uB208\uC5D0 \uBCF4\uC774\uB294 \uAC24\uB7EC\uB9AC\uB85C \uD45C\uC2DC\uB429\uB2C8\uB2E4. \uC5EC\uAE30\uC11C\uB294 \uBD84\uB958\uBCC4\uB85C \uC5C5\uB85C\uB4DC\uD558\uACE0 \uC0AD\uC81C\uB9CC \uC27D\uAC8C \uAD00\uB9AC\uD569\uB2C8\uB2E4."
             >
               <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
@@ -1471,15 +1471,15 @@ export default function Admin() {
                     </div>
 
                     <div>
-                      <h3 className="font-bold text-slate-900">ìë£ ìë¡ë</h3>
+                      <h3 className="font-bold text-slate-900">&#xC790;&#xB8CC; &#xC5C5;&#xB85C;&#xB4DC;</h3>
                       <p className="mt-1 text-sm text-slate-500">
-                        ë¶ë¥ë¥¼ ê³ ë¥´ê³  ì¬ë¬ ì´ë¯¸ì§ë¥¼ í ë²ì ì¶ê°í  ì ììµëë¤.
+                        &#xBD84;&#xB958;&#xB97C; &#xACE0;&#xB974;&#xACE0; &#xC5EC;&#xB7EC; &#xC774;&#xBBF8;&#xC9C0;&#xB97C; &#xD55C; &#xBC88;&#xC5D0; &#xCD94;&#xAC00;&#xD560; &#xC218; &#xC788;&#xC2B5;&#xB2C8;&#xB2E4;.
                       </p>
                     </div>
                   </div>
 
                   <div className="mt-5">
-                    <p className="mb-2 text-sm font-bold text-slate-700">ìë¡ëí  ë¶ë¥</p>
+                    <p className="mb-2 text-sm font-bold text-slate-700">&#xC5C5;&#xB85C;&#xB4DC;&#xD560; &#xBD84;&#xB958;</p>
                     <div className="grid gap-2">
                       {achievementTabs.map((tab) => (
                         <button
@@ -1500,7 +1500,7 @@ export default function Admin() {
                           </span>
 
                           <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-500">
-                            {tab.images?.length || 0}ì¥
+                            {tab.images?.length || 0}&#xC7A5;
                           </span>
                         </button>
                       ))}
@@ -1519,7 +1519,7 @@ export default function Admin() {
                     {selectedAchievementImages.length > 0 && (
                       <div className="mt-3 rounded-xl bg-white p-3 text-sm text-slate-600">
                         <p className="font-bold text-slate-800">
-                          ì íë íì¼ {selectedAchievementImages.length}ê°
+                          &#xC120;&#xD0DD;&#xB41C; &#xD30C;&#xC77C; {selectedAchievementImages.length}&#xAC1C;
                         </p>
 
                         <ul className="mt-2 max-h-36 space-y-1 overflow-auto pr-1">
@@ -1540,13 +1540,13 @@ export default function Admin() {
                     className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
-                    ì íí ë¶ë¥ì ì´ë¯¸ì§ ì¶ê°
+                    &#xC120;&#xD0DD;&#xD55C; &#xBD84;&#xB958;&#xC5D0; &#xC774;&#xBBF8;&#xC9C0; &#xCD94;&#xAC00;
                   </button>
 
                   <div className="mt-5 rounded-2xl bg-white p-4 text-sm text-slate-600">
-                    <p className="font-bold text-slate-900">íì¬ ì ì²´ ë±ë¡ ì: {totalAchievementImages}ì¥</p>
+                    <p className="font-bold text-slate-900">&#xD604;&#xC7AC; &#xC804;&#xCCB4; &#xB4F1;&#xB85D; &#xC218;: {totalAchievementImages}&#xC7A5;</p>
                     <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                      ííì´ì§ììë ë¶ë¥ì ìê´ìì´ ëª¨ë  ì´ë¯¸ì§ê° í ì¤ ê°¤ë¬ë¦¬ ííë¡ ì ë¦¬ëì´ íìë©ëë¤.
+                      &#xD648;&#xD398;&#xC774;&#xC9C0;&#xC5D0;&#xC11C;&#xB294; &#xBD84;&#xB958;&#xC640; &#xC0C1;&#xAD00;&#xC5C6;&#xC774; &#xBAA8;&#xB4E0; &#xC774;&#xBBF8;&#xC9C0;&#xAC00; &#xD55C; &#xC904; &#xAC24;&#xB7EC;&#xB9AC; &#xD615;&#xD0DC;&#xB85C; &#xC815;&#xB9AC;&#xB418;&#xC5B4; &#xD45C;&#xC2DC;&#xB429;&#xB2C8;&#xB2E4;.
                     </p>
                   </div>
                 </div>
@@ -1563,7 +1563,7 @@ export default function Admin() {
                             {tab.label}
                           </h3>
                           <p className="mt-1 text-sm text-slate-500">
-                            ë±ë¡ë ì´ë¯¸ì§ {tab.images?.length || 0}ì¥
+                            &#xB4F1;&#xB85D;&#xB41C; &#xC774;&#xBBF8;&#xC9C0; {tab.images?.length || 0}&#xC7A5;
                           </p>
                         </div>
 
@@ -1572,7 +1572,7 @@ export default function Admin() {
                           onClick={() => setSelectedAchievementTabId(tab.id)}
                           className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-200"
                         >
-                          ì´ ë¶ë¥ì ì¶ê°
+                          &#xC774; &#xBD84;&#xB958;&#xC5D0; &#xCD94;&#xAC00;
                         </button>
                       </div>
 
@@ -1583,7 +1583,7 @@ export default function Admin() {
                               <div className="aspect-[3/4] bg-white p-2">
                                 <img
                                   src={achievementImagePreviewUrls[image] || image}
-                                  alt={`${tab.label} ì´ë¯¸ì§ ${index + 1}`}
+                                  alt={`${tab.label} \uC774\uBBF8\uC9C0 ${index + 1}`}
                                   className="h-full w-full object-contain"
                                   onError={(event) => {
                                     event.currentTarget.style.display = 'none';
@@ -1603,14 +1603,14 @@ export default function Admin() {
                                   className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                   {isBusy ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                                  ì­ì 
+                                  &#xC0AD;&#xC81C;
                                 </button>
                               </div>
                             </div>
                           ))
                         ) : (
                           <div className="col-span-2 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500 md:col-span-3">
-                            ìì§ ë±ë¡ë ì´ë¯¸ì§ê° ììµëë¤.
+                            &#xC544;&#xC9C1; &#xB4F1;&#xB85D;&#xB41C; &#xC774;&#xBBF8;&#xC9C0;&#xAC00; &#xC5C6;&#xC2B5;&#xB2C8;&#xB2E4;.
                           </div>
                         )}
                       </div>
@@ -1620,49 +1620,49 @@ export default function Admin() {
               </div>
             </AdminSection>
 
-            <AdminSection title="íì¬ ê¸°ë³¸ ì ë³´" description="íì¬ëª, ëíì, ì°ë½ì², ì£¼ì ë± ííì´ì§ ì ë°ì ì¬ì©ëë ì ë³´ìëë¤.">
+            <AdminSection title="\uD68C\uC0AC \uAE30\uBCF8 \uC815\uBCF4" description="\uD68C\uC0AC\uBA85, \uB300\uD45C\uC790, \uC5F0\uB77D\uCC98, \uC8FC\uC18C \uB4F1 \uD648\uD398\uC774\uC9C0 \uC804\uBC18\uC5D0 \uC0AC\uC6A9\uB418\uB294 \uC815\uBCF4\uC785\uB2C8\uB2E4.">
               <div className="grid gap-5 md:grid-cols-2">
-                <TextInput label="íì¬ëª" value={content.company.name} onChange={(value) => updateCompany('name', value)} />
-                <TextInput label="ìë¬¸ íì¬ëª" value={content.company.englishName} onChange={(value) => updateCompany('englishName', value)} />
-                <TextInput label="ëíì" value={content.company.representative} onChange={(value) => updateCompany('representative', value)} />
-                <TextInput label="ì´ë©ì¼" type="email" value={content.company.email} onChange={(value) => updateCompany('email', value)} />
-                <TextInput label="ì íë²í¸" value={content.company.phone} onChange={(value) => updateCompany('phone', value)} />
-                <TextInput label="í©ì¤ë²í¸" value={content.company.fax} onChange={(value) => updateCompany('fax', value)} />
-                <TextInput label="ì£¼ì" value={content.company.address} onChange={(value) => updateCompany('address', value)} />
-                <TextInput label="ì¬ììë±ë¡ë²í¸" value={content.company.businessNumber} onChange={(value) => updateCompany('businessNumber', value)} />
+                <TextInput label="\uD68C\uC0AC\uBA85" value={content.company.name} onChange={(value) => updateCompany('name', value)} />
+                <TextInput label="\uC601\uBB38 \uD68C\uC0AC\uBA85" value={content.company.englishName} onChange={(value) => updateCompany('englishName', value)} />
+                <TextInput label="\uB300\uD45C\uC790" value={content.company.representative} onChange={(value) => updateCompany('representative', value)} />
+                <TextInput label="\uC774\uBA54\uC77C" type="email" value={content.company.email} onChange={(value) => updateCompany('email', value)} />
+                <TextInput label="\uC804\uD654\uBC88\uD638" value={content.company.phone} onChange={(value) => updateCompany('phone', value)} />
+                <TextInput label="\uD329\uC2A4\uBC88\uD638" value={content.company.fax} onChange={(value) => updateCompany('fax', value)} />
+                <TextInput label="\uC8FC\uC18C" value={content.company.address} onChange={(value) => updateCompany('address', value)} />
+                <TextInput label="\uC0AC\uC5C5\uC790\uB4F1\uB85D\uBC88\uD638" value={content.company.businessNumber} onChange={(value) => updateCompany('businessNumber', value)} />
                 <div className="md:col-span-2">
-                  <TextInput label="í¸í° ìë¬¸ ë¬¸êµ¬" value={content.company.tagline} onChange={(value) => updateCompany('tagline', value)} />
+                  <TextInput label="\uD478\uD130 \uC601\uBB38 \uBB38\uAD6C" value={content.company.tagline} onChange={(value) => updateCompany('tagline', value)} />
                 </div>
               </div>
             </AdminSection>
 
-            <AdminSection title="ë©ì¸ íë©´" description="ííì´ì§ ì²« íë©´ì ë³´ì´ë í° ë¬¸êµ¬ì ë²í¼ìëë¤.">
+            <AdminSection title="\uBA54\uC778 \uD654\uBA74" description="\uD648\uD398\uC774\uC9C0 \uCCAB \uD654\uBA74\uC5D0 \uBCF4\uC774\uB294 \uD070 \uBB38\uAD6C\uC640 \uBC84\uD2BC\uC785\uB2C8\uB2E4.">
               <div className="grid gap-5 md:grid-cols-2">
-                <TextInput label="ìë¨ ìë¬¸ ë¬¸êµ¬" value={content.hero.eyebrow} onChange={(value) => updateHero('eyebrow', value)} />
-                <TextInput label="ê°ì¡°í  ë¨ì´" value={content.hero.highlight} onChange={(value) => updateHero('highlight', value)} />
+                <TextInput label="\uC0C1\uB2E8 \uC601\uBB38 \uBB38\uAD6C" value={content.hero.eyebrow} onChange={(value) => updateHero('eyebrow', value)} />
+                <TextInput label="\uAC15\uC870\uD560 \uB2E8\uC5B4" value={content.hero.highlight} onChange={(value) => updateHero('highlight', value)} />
                 <div className="md:col-span-2">
-                  <TextInput label="í° ì ëª©" value={content.hero.title} onChange={(value) => updateHero('title', value)} />
+                  <TextInput label="\uD070 \uC81C\uBAA9" value={content.hero.title} onChange={(value) => updateHero('title', value)} />
                 </div>
                 <div className="md:col-span-2">
-                  <TextArea label="ì¤ëª ë¬¸êµ¬" rows={4} value={content.hero.description} onChange={(value) => updateHero('description', value)} />
+                  <TextArea label="\uC124\uBA85 \uBB38\uAD6C" rows={4} value={content.hero.description} onChange={(value) => updateHero('description', value)} />
                 </div>
-                <TextInput label="ì²« ë²ì§¸ ë²í¼ ë¬¸êµ¬" value={content.hero.primaryButton.label} onChange={(value) => updateHero('primaryButton', { ...content.hero.primaryButton, label: value })} />
-                <TextInput label="ì²« ë²ì§¸ ë²í¼ ë§í¬" value={content.hero.primaryButton.href} onChange={(value) => updateHero('primaryButton', { ...content.hero.primaryButton, href: value })} />
-                <TextInput label="ë ë²ì§¸ ë²í¼ ë¬¸êµ¬" value={content.hero.secondaryButton.label} onChange={(value) => updateHero('secondaryButton', { ...content.hero.secondaryButton, label: value })} />
-                <TextInput label="ë ë²ì§¸ ë²í¼ ë§í¬" value={content.hero.secondaryButton.href} onChange={(value) => updateHero('secondaryButton', { ...content.hero.secondaryButton, href: value })} />
+                <TextInput label="\uCCAB \uBC88\uC9F8 \uBC84\uD2BC \uBB38\uAD6C" value={content.hero.primaryButton.label} onChange={(value) => updateHero('primaryButton', { ...content.hero.primaryButton, label: value })} />
+                <TextInput label="\uCCAB \uBC88\uC9F8 \uBC84\uD2BC \uB9C1\uD06C" value={content.hero.primaryButton.href} onChange={(value) => updateHero('primaryButton', { ...content.hero.primaryButton, href: value })} />
+                <TextInput label="\uB450 \uBC88\uC9F8 \uBC84\uD2BC \uBB38\uAD6C" value={content.hero.secondaryButton.label} onChange={(value) => updateHero('secondaryButton', { ...content.hero.secondaryButton, label: value })} />
+                <TextInput label="\uB450 \uBC88\uC9F8 \uBC84\uD2BC \uB9C1\uD06C" value={content.hero.secondaryButton.href} onChange={(value) => updateHero('secondaryButton', { ...content.hero.secondaryButton, href: value })} />
               </div>
             </AdminSection>
 
-            <AdminSection title="íì¬ ìê°" description="íì¬ ìê° ì¹ìì ì ëª©ê³¼ ë³¸ë¬¸ìëë¤.">
+            <AdminSection title="\uD68C\uC0AC \uC18C\uAC1C" description="\uD68C\uC0AC \uC18C\uAC1C \uC139\uC158\uC758 \uC81C\uBAA9\uACFC \uBCF8\uBB38\uC785\uB2C8\uB2E4.">
               <div className="grid gap-5 md:grid-cols-2">
-                <TextInput label="ìì ëª©" value={content.about.eyebrow} onChange={(value) => updateAbout('eyebrow', value)} />
-                <TextInput label="ì¤ë¥¸ìª½ ë°ì¤ ì ëª©" value={content.about.visualTitle} onChange={(value) => updateAbout('visualTitle', value)} />
+                <TextInput label="\uC18C\uC81C\uBAA9" value={content.about.eyebrow} onChange={(value) => updateAbout('eyebrow', value)} />
+                <TextInput label="\uC624\uB978\uCABD \uBC15\uC2A4 \uC81C\uBAA9" value={content.about.visualTitle} onChange={(value) => updateAbout('visualTitle', value)} />
                 <div className="md:col-span-2">
-                  <TextArea label="ìê° ì ëª©" rows={3} value={content.about.title} onChange={(value) => updateAbout('title', value)} />
+                  <TextArea label="\uC18C\uAC1C \uC81C\uBAA9" rows={3} value={content.about.title} onChange={(value) => updateAbout('title', value)} />
                 </div>
-                <TextInput label="ì¤ë¥¸ìª½ ë°ì¤ ë³´ì¡° ë¬¸êµ¬" value={content.about.visualSubtitle} onChange={(value) => updateAbout('visualSubtitle', value)} />
+                <TextInput label="\uC624\uB978\uCABD \uBC15\uC2A4 \uBCF4\uC870 \uBB38\uAD6C" value={content.about.visualSubtitle} onChange={(value) => updateAbout('visualSubtitle', value)} />
                 <TextInput
-                  label="íì¬ìê° ì¬ë¼ì´ë ì í ìê°(ms)"
+                  label="\uD68C\uC0AC\uC18C\uAC1C \uC2AC\uB77C\uC774\uB4DC \uC804\uD658 \uC2DC\uAC04(ms)"
                   value={String(content.about.slideIntervalMs || 4000)}
                   onChange={(value) => updateAbout('slideIntervalMs', Number(value) || 4000)}
                 />
@@ -1672,7 +1672,7 @@ export default function Admin() {
                 {content.about.paragraphs.map((paragraph, index) => (
                   <TextArea
                     key={index}
-                    label={`ìê° ë³¸ë¬¸ ${index + 1}`}
+                    label={`\uC18C\uAC1C \uBCF8\uBB38 ${index + 1}`}
                     value={paragraph}
                     onChange={(value) => updateAboutParagraph(index, value)}
                   />
@@ -1680,15 +1680,15 @@ export default function Admin() {
               </div>
             </AdminSection>
 
-            <AdminSection title="ì£¼ì ì¬ì ë¶ì¼" description="ì¬ì ë¶ì¼ ì¹´ëì ì ëª©, ì¤ëª, ìì´ì½ ì´ë¦ì ìì í©ëë¤.">
+            <AdminSection title="\uC8FC\uC694 \uC0AC\uC5C5 \uBD84\uC57C" description="\uC0AC\uC5C5 \uBD84\uC57C \uCE74\uB4DC\uC758 \uC81C\uBAA9, \uC124\uBA85, \uC544\uC774\uCF58 \uC774\uB984\uC744 \uC218\uC815\uD569\uB2C8\uB2E4.">
               <div className="grid gap-5 md:grid-cols-2">
                 <TextInput
-                  label="ìì ëª©"
+                  label="\uC18C\uC81C\uBAA9"
                   value={content.services.eyebrow}
                   onChange={(value) => updateServices('eyebrow', value)}
                 />
                 <TextInput
-                  label="ì ëª©"
+                  label="\uC81C\uBAA9"
                   value={content.services.title}
                   onChange={(value) => updateServices('title', value)}
                 />
@@ -1697,26 +1697,26 @@ export default function Admin() {
               <div className="mt-6 grid gap-5 lg:grid-cols-2">
                 {content.services.items.map((item, index) => (
                   <div key={index} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                    <h3 className="mb-4 font-bold text-slate-900">ì¬ì ë¶ì¼ {index + 1}</h3>
+                    <h3 className="mb-4 font-bold text-slate-900">&#xC0AC;&#xC5C5; &#xBD84;&#xC57C; {index + 1}</h3>
                     <div className="space-y-4">
-                      <TextInput label="ì ëª©" value={item.title} onChange={(value) => updateService(index, 'title', value)} />
-                      <TextArea label="ì¤ëª" value={item.description} onChange={(value) => updateService(index, 'description', value)} />
-                      <TextInput label="ìì´ì½ ì´ë¦" value={item.icon} onChange={(value) => updateService(index, 'icon', value)} />
+                      <TextInput label="\uC81C\uBAA9" value={item.title} onChange={(value) => updateService(index, 'title', value)} />
+                      <TextArea label="\uC124\uBA85" value={item.description} onChange={(value) => updateService(index, 'description', value)} />
+                      <TextInput label="\uC544\uC774\uCF58 \uC774\uB984" value={item.icon} onChange={(value) => updateService(index, 'icon', value)} />
                     </div>
                   </div>
                 ))}
               </div>
             </AdminSection>
 
-            <AdminSection title="ì ë¬¸ ê¸°ì " description="ì½ë ì², MCT, CNC ë± ì ë¬¸ ê¸°ì  ê´ë ¨ ë¬¸êµ¬ìëë¤.">
+            <AdminSection title="\uC804\uBB38 \uAE30\uC220" description="\uCF5C\uB81B\uCC99, MCT, CNC \uB4F1 \uC804\uBB38 \uAE30\uC220 \uAD00\uB828 \uBB38\uAD6C\uC785\uB2C8\uB2E4.">
               <div className="grid gap-5 md:grid-cols-2">
-                <TextInput label="ìì ëª©" value={content.expertise.eyebrow} onChange={(value) => updateExpertise('eyebrow', value)} />
-                <TextInput label="ì ëª©" value={content.expertise.title} onChange={(value) => updateExpertise('title', value)} />
+                <TextInput label="\uC18C\uC81C\uBAA9" value={content.expertise.eyebrow} onChange={(value) => updateExpertise('eyebrow', value)} />
+                <TextInput label="\uC81C\uBAA9" value={content.expertise.title} onChange={(value) => updateExpertise('title', value)} />
                 <div className="md:col-span-2">
-                  <TextInput label="ë©ì¸ ì ëª©" value={content.expertise.mainTitle} onChange={(value) => updateExpertise('mainTitle', value)} />
+                  <TextInput label="\uBA54\uC778 \uC81C\uBAA9" value={content.expertise.mainTitle} onChange={(value) => updateExpertise('mainTitle', value)} />
                 </div>
                 <div className="md:col-span-2">
-                  <TextArea label="ë©ì¸ ì¤ëª" value={content.expertise.mainDescription} onChange={(value) => updateExpertise('mainDescription', value)} />
+                  <TextArea label="\uBA54\uC778 \uC124\uBA85" value={content.expertise.mainDescription} onChange={(value) => updateExpertise('mainDescription', value)} />
                 </div>
               </div>
 
@@ -1724,7 +1724,7 @@ export default function Admin() {
                 {content.expertise.points.map((point, index) => (
                   <TextInput
                     key={index}
-                    label={`ê¸°ì  í¬ì¸í¸ ${index + 1}`}
+                    label={`\uAE30\uC220 \uD3EC\uC778\uD2B8 ${index + 1}`}
                     value={point}
                     onChange={(value) => updateExpertisePoint(index, value)}
                   />
@@ -1734,20 +1734,20 @@ export default function Admin() {
               <div className="mt-6 grid gap-5 lg:grid-cols-2">
                 {content.expertise.cards.map((card, index) => (
                   <div key={index} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                    <h3 className="mb-4 font-bold text-slate-900">ê¸°ì  ì¹´ë {index + 1}</h3>
+                    <h3 className="mb-4 font-bold text-slate-900">&#xAE30;&#xC220; &#xCE74;&#xB4DC; {index + 1}</h3>
                     <div className="space-y-4">
-                      <TextInput label="ì ëª©" value={card.title} onChange={(value) => updateExpertiseCard(index, 'title', value)} />
-                      <TextArea label="ì¤ëª" value={card.description} onChange={(value) => updateExpertiseCard(index, 'description', value)} />
+                      <TextInput label="\uC81C\uBAA9" value={card.title} onChange={(value) => updateExpertiseCard(index, 'title', value)} />
+                      <TextArea label="\uC124\uBA85" value={card.description} onChange={(value) => updateExpertiseCard(index, 'description', value)} />
                     </div>
                   </div>
                 ))}
               </div>
             </AdminSection>
 
-            <AdminSection title="ê²½ìë ¥" description="ë¯¼ìì ë°ì ê°ì  ì¹´ëìëë¤.">
+            <AdminSection title="\uACBD\uC7C1\uB825" description="\uBBFC\uC601\uC815\uBC00\uC758 \uAC15\uC810 \uCE74\uB4DC\uC785\uB2C8\uB2E4.">
               <div className="grid gap-5 md:grid-cols-2">
                 <TextInput
-                  label="ìì ëª©"
+                  label="\uC18C\uC81C\uBAA9"
                   value={content.strengths.eyebrow}
                   onChange={(value) =>
                     setContent((prev) =>
@@ -1756,7 +1756,7 @@ export default function Admin() {
                   }
                 />
                 <TextInput
-                  label="ì ëª©"
+                  label="\uC81C\uBAA9"
                   value={content.strengths.title}
                   onChange={(value) =>
                     setContent((prev) =>
@@ -1769,37 +1769,37 @@ export default function Admin() {
               <div className="mt-6 grid gap-5 lg:grid-cols-2">
                 {content.strengths.items.map((item, index) => (
                   <div key={index} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                    <h3 className="mb-4 font-bold text-slate-900">ê²½ìë ¥ {index + 1}</h3>
+                    <h3 className="mb-4 font-bold text-slate-900">&#xACBD;&#xC7C1;&#xB825; {index + 1}</h3>
                     <div className="space-y-4">
-                      <TextInput label="ì ëª©" value={item.title} onChange={(value) => updateStrength(index, 'title', value)} />
-                      <TextArea label="ì¤ëª" value={item.description} onChange={(value) => updateStrength(index, 'description', value)} />
-                      <TextInput label="ìì´ì½ ì´ë¦" value={item.icon} onChange={(value) => updateStrength(index, 'icon', value)} />
+                      <TextInput label="\uC81C\uBAA9" value={item.title} onChange={(value) => updateStrength(index, 'title', value)} />
+                      <TextArea label="\uC124\uBA85" value={item.description} onChange={(value) => updateStrength(index, 'description', value)} />
+                      <TextInput label="\uC544\uC774\uCF58 \uC774\uB984" value={item.icon} onChange={(value) => updateStrength(index, 'icon', value)} />
                     </div>
                   </div>
                 ))}
               </div>
             </AdminSection>
 
-            <AdminSection title="ë¬¸ì ìì­" description="ë¬¸ìíê¸° ì¹ìê³¼ ì´ë©ì¼ ë²í¼ ë¬¸êµ¬ìëë¤.">
+            <AdminSection title="\uBB38\uC758 \uC601\uC5ED" description="\uBB38\uC758\uD558\uAE30 \uC139\uC158\uACFC \uC774\uBA54\uC77C \uBC84\uD2BC \uBB38\uAD6C\uC785\uB2C8\uB2E4.">
               <div className="grid gap-5 md:grid-cols-2">
-                <TextInput label="ë¬¸ì ì ëª©" value={content.contact.title} onChange={(value) => updateContact('title', value)} />
-                <TextInput label="ë²í¼ ì ëª©" value={content.contact.emailButtonTitle} onChange={(value) => updateContact('emailButtonTitle', value)} />
+                <TextInput label="\uBB38\uC758 \uC81C\uBAA9" value={content.contact.title} onChange={(value) => updateContact('title', value)} />
+                <TextInput label="\uBC84\uD2BC \uC81C\uBAA9" value={content.contact.emailButtonTitle} onChange={(value) => updateContact('emailButtonTitle', value)} />
                 <div className="md:col-span-2">
-                  <TextArea label="ë¬¸ì ì¤ëª" value={content.contact.description} onChange={(value) => updateContact('description', value)} />
+                  <TextArea label="\uBB38\uC758 \uC124\uBA85" value={content.contact.description} onChange={(value) => updateContact('description', value)} />
                 </div>
-                <TextInput label="ë²í¼ ì¤ëª" value={content.contact.emailButtonDescription} onChange={(value) => updateContact('emailButtonDescription', value)} />
-                <TextInput label="ë²í¼ ìì ë¬¸êµ¬" value={content.contact.emailButtonSmallText} onChange={(value) => updateContact('emailButtonSmallText', value)} />
+                <TextInput label="\uBC84\uD2BC \uC124\uBA85" value={content.contact.emailButtonDescription} onChange={(value) => updateContact('emailButtonDescription', value)} />
+                <TextInput label="\uBC84\uD2BC \uC791\uC740 \uBB38\uAD6C" value={content.contact.emailButtonSmallText} onChange={(value) => updateContact('emailButtonSmallText', value)} />
               </div>
             </AdminSection>
 
-            <AdminSection title="í¸í°" description="íë¨ ì ìê¶ ë¬¸êµ¬ìëë¤.">
-              <TextInput label="ì ìê¶ ë¬¸êµ¬" value={content.footer.copyrightText} onChange={(value) => updateFooter('copyrightText', value)} />
+            <AdminSection title="\uD478\uD130" description="\uD558\uB2E8 \uC800\uC791\uAD8C \uBB38\uAD6C\uC785\uB2C8\uB2E4.">
+              <TextInput label="\uC800\uC791\uAD8C \uBB38\uAD6C" value={content.footer.copyrightText} onChange={(value) => updateFooter('copyrightText', value)} />
             </AdminSection>
 
             <div className="sticky bottom-4 z-20 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-2xl backdrop-blur">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="text-sm text-slate-600">
-                  ìì  í ë°ëì <strong className="text-slate-900">ì ì¥íê¸°</strong>ë¥¼ ëë¬ì¼ ííì´ì§ì ë°ìë©ëë¤.
+                  &#xC218;&#xC815; &#xD6C4; &#xBC18;&#xB4DC;&#xC2DC; <strong className="text-slate-900">&#xC800;&#xC7A5;&#xD558;&#xAE30;</strong>&#xB97C; &#xB20C;&#xB7EC;&#xC57C; &#xD648;&#xD398;&#xC774;&#xC9C0;&#xC5D0; &#xBC18;&#xC601;&#xB429;&#xB2C8;&#xB2E4;.
                 </div>
 
                 <button
@@ -1809,7 +1809,7 @@ export default function Admin() {
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isBusy ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                  ì ì¥íê¸°
+                  &#xC800;&#xC7A5;&#xD558;&#xAE30;
                 </button>
               </div>
             </div>
@@ -1821,10 +1821,10 @@ export default function Admin() {
         <div className="flex flex-wrap items-center justify-center gap-2">
           <Building2 size={14} />
           <span>Min Young Precision Admin</span>
-          <span>Â·</span>
+          <span>&#xB7;</span>
           <Mail size={14} />
           <span>GitHub Contents API</span>
-          <span>Â·</span>
+          <span>&#xB7;</span>
           <MapPin size={14} />
           <span>Cloudflare Pages</span>
         </div>
