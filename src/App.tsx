@@ -1,6 +1,7 @@
 import Header from './components/Header'
 import Hero from './components/Hero'
 import About from './components/About'
+import Achievements from './components/Achievements'
 import Services from './components/Services'
 import Expertise from './components/Expertise'
 import Strengths from './components/Strengths'
@@ -22,6 +23,7 @@ function App() {
       <main>
         <Hero />
         <About />
+        <Achievements />
         <Services />
         <Expertise />
         <Strengths />
