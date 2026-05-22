@@ -23,6 +23,8 @@ export default function About() {
     }
   }, [currentImageIndex, images.length]);
 
+  const currentImage = images[currentImageIndex];
+
   return (
     <section id="about" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -44,43 +46,75 @@ export default function About() {
           </div>
 
           <div className="relative group">
-            <div className="absolute -inset-4 bg-slate-100 rounded-2xl transform rotate-2 group-hover:rotate-1 transition-transform"></div>
+            <div className="absolute -inset-4 bg-slate-100 rounded-3xl transform rotate-2 group-hover:rotate-1 transition-transform"></div>
 
             {images.length > 0 ? (
-              <div className="relative aspect-[4/3] md:aspect-[5/4] rounded-2xl shadow-2xl overflow-hidden bg-slate-950 border border-slate-100">
-                {images.map((image, index) => (
-                  <img
-                    key={`${image}-${index}`}
-                    src={image}
-                    alt={`민영정밀 회사소개 이미지 ${index + 1}`}
-                    className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-700 ${
-                      index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  />
-                ))}
-
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/25 via-transparent to-transparent"></div>
-
-                {images.length > 1 && (
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-                    {images.map((_, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        onClick={() => setCurrentImageIndex(index)}
-                        aria-label={`이미지 ${index + 1} 보기`}
-                        className={`h-2.5 rounded-full transition-all ${
-                          index === currentImageIndex
-                            ? 'w-8 bg-white'
-                            : 'w-2.5 bg-white/50 hover:bg-white/80'
-                        }`}
+              <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-2xl">
+                <div className="relative h-[420px] md:h-[520px]">
+                  {images.map((image, index) => (
+                    <div
+                      key={`${image}-${index}`}
+                      className={`absolute inset-0 transition-opacity duration-700 ${
+                        index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    >
+                      <img
+                        src={image}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl"
                       />
-                    ))}
+
+                      <div className="absolute inset-0 bg-white/35"></div>
+
+                      <img
+                        src={image}
+                        alt={`민영정밀 회사소개 이미지 ${index + 1}`}
+                        className="relative z-10 h-full w-full object-contain p-3 md:p-4"
+                      />
+                    </div>
+                  ))}
+
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-24 bg-gradient-to-t from-slate-950/45 to-transparent"></div>
+
+                  {images.length > 1 && (
+                    <div className="absolute bottom-4 left-0 right-0 z-30 flex justify-center gap-2 px-4">
+                      {images.map((_, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => setCurrentImageIndex(index)}
+                          aria-label={`이미지 ${index + 1} 보기`}
+                          className={`h-2.5 rounded-full transition-all ${
+                            index === currentImageIndex
+                              ? 'w-8 bg-white shadow'
+                              : 'w-2.5 bg-white/55 hover:bg-white/85'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {images.length > 1 && (
+                    <div className="absolute right-4 top-4 z-30 rounded-full bg-slate-950/60 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+                      {currentImageIndex + 1} / {images.length}
+                    </div>
+                  )}
+                </div>
+
+                {currentImage && (
+                  <div className="border-t border-slate-200 bg-white px-5 py-4">
+                    <p className="text-sm font-bold text-slate-900">
+                      민영정밀 현장 및 주요 자료
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      이미지 전체가 보이도록 표시하고, 남는 공간은 같은 이미지를 흐림 배경으로 채워 자연스럽게 보이도록 처리했습니다.
+                    </p>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="relative bg-brand-dark aspect-[4/3] md:aspect-[5/4] rounded-2xl shadow-2xl flex items-center justify-center p-8 overflow-hidden">
+              <div className="relative bg-brand-dark aspect-video rounded-xl shadow-2xl flex items-center justify-center p-8 overflow-hidden">
                 <div className="text-center z-10">
                   <div className="text-brand-blue font-mono text-5xl mb-4 italic font-black uppercase tracking-tighter">
                     {about.visualTitle}
