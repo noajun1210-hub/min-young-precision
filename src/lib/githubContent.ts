@@ -95,6 +95,11 @@ function makeAboutImageFileName(file: File) {
   return `about-slide-${Date.now()}.${extension}`;
 }
 
+function makeServiceImageFileName(file: File) {
+  const extension = getSafeImageExtension(file);
+  return `service-slide-${Date.now()}.${extension}`;
+}
+
 function makeAchievementImageFileName(file: File, tabId: string) {
   const extension = getSafeImageExtension(file);
   const safeTabId = tabId.replace(/[^a-zA-Z0-9-_]/g, '') || 'achievement';
@@ -264,6 +269,17 @@ export async function uploadAboutSlideImage(token: string, file: File) {
     file,
     fileName,
     'Upload about slide image'
+  );
+}
+
+export async function uploadServiceSlideImage(token: string, file: File) {
+  const fileName = makeServiceImageFileName(file);
+
+  return uploadImageToGitHub(
+    token,
+    file,
+    fileName,
+    'Upload service slide image'
   );
 }
 
