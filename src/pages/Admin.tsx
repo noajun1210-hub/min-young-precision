@@ -28,6 +28,7 @@ import {
   uploadAboutSlideImage,
   uploadAchievementImage,
   uploadHeroBackgroundImage,
+  uploadServiceSlideImage,
 } from '../lib/githubContent';
 
 type CompanyInfo = {
@@ -98,6 +99,8 @@ type ServicesContent = {
   eyebrow: string;
   title: string;
   items: ServiceItem[];
+  images?: string[];
+  slideIntervalMs?: number;
 };
 
 type ExpertiseCard = {
@@ -154,6 +157,7 @@ type SiteContent = {
 type StatusType = 'idle' | 'loading' | 'success' | 'error';
 
 const MAX_ABOUT_IMAGES = 10;
+const MAX_SERVICE_IMAGES = 10;
 
 function TextInput({
   label,
@@ -253,6 +257,8 @@ export default function Admin() {
   const [selectedHeroImage, setSelectedHeroImage] = useState<File | null>(null);
   const [selectedAboutImages, setSelectedAboutImages] = useState<File[]>([]);
   const [aboutImagePreviewUrls, setAboutImagePreviewUrls] = useState<Record<string, string>>({});
+  const [selectedServiceImages, setSelectedServiceImages] = useState<File[]>([]);
+  const [serviceImagePreviewUrls, setServiceImagePreviewUrls] = useState<Record<string, string>>({});
   const [selectedAchievementImages, setSelectedAchievementImages] = useState<File[]>([]);
   const [achievementImagePreviewUrls, setAchievementImagePreviewUrls] = useState<Record<string, string>>({});
   const [selectedAchievementTabId, setSelectedAchievementTabId] = useState('patents');
@@ -264,6 +270,7 @@ export default function Admin() {
   }, []);
 
   const aboutImages = content?.about.images || [];
+  const serviceImages = content?.services.images || [];
   const achievementTabs = content?.achievements.tabs || [];
   const activeAchievementTab =
     achievementTabs.find((tab) => tab.id === selectedAchievementTabId) ||
@@ -501,6 +508,95 @@ export default function Admin() {
     }
   }
 
+  async function handleServiceImageUpload() {
+    if (!content) {
+      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      return;
+    }
+
+    if (selectedServiceImages.length === 0) {
+      setStatusMessage('error', '업로드할 사업 분야 이미지를 선택해주세요.');
+      return;
+    }
+
+    const currentImages = content.services.images || [];
+
+    if (currentImages.length + selectedServiceImages.length > MAX_SERVICE_IMAGES) {
+      setStatusMessage(
+        'error',
+        `사업 분야 이미지는 최대 ${MAX_SERVICE_IMAGES}장까지 등록할 수 있습니다. 현재 ${currentImages.length}장이 등록되어 있으므로 ${MAX_SERVICE_IMAGES - currentImages.length}장까지만 추가할 수 있습니다.`
+      );
+      return;
+    }
+
+    try {
+      setStatusMessage('loading', '사업 분야 이미지를 GitHub에 업로드하는 중입니다.');
+
+      const uploadedImagePaths: string[] = [];
+      const nextPreviewUrls: Record<string, string> = {};
+
+      for (const file of selectedServiceImages) {
+        const uploadedImage = await uploadServiceSlideImage(token, file);
+        uploadedImagePaths.push(uploadedImage.publicPath);
+        nextPreviewUrls[uploadedImage.publicPath] = URL.createObjectURL(file);
+      }
+
+      const nextContent: SiteContent = {
+        ...content,
+        services: {
+          ...content.services,
+          images: [...currentImages, ...uploadedImagePaths],
+          slideIntervalMs: content.services.slideIntervalMs || 4000,
+        },
+      };
+
+      await saveSiteContent(token, nextContent);
+
+      setContent(nextContent);
+      setSelectedServiceImages([]);
+      setServiceImagePreviewUrls((prev) => ({
+        ...prev,
+        ...nextPreviewUrls,
+      }));
+      setStatusMessage('success', '사업 분야 이미지가 추가되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+    } catch (error) {
+      setStatusMessage('error', error instanceof Error ? error.message : '사업 분야 이미지 업로드에 실패했습니다.');
+    }
+  }
+
+  async function handleServiceImageDelete(imagePath: string) {
+    if (!content) {
+      setStatusMessage('error', '먼저 데이터를 불러와주세요.');
+      return;
+    }
+
+    try {
+      setStatusMessage('loading', '사업 분야 이미지를 삭제하는 중입니다.');
+
+      await deleteUploadedImage(token, imagePath);
+
+      const nextContent: SiteContent = {
+        ...content,
+        services: {
+          ...content.services,
+          images: (content.services.images || []).filter((image) => image !== imagePath),
+        },
+      };
+
+      await saveSiteContent(token, nextContent);
+
+      setContent(nextContent);
+      setServiceImagePreviewUrls((prev) => {
+        const nextPreviewUrls = { ...prev };
+        delete nextPreviewUrls[imagePath];
+        return nextPreviewUrls;
+      });
+      setStatusMessage('success', '사업 분야 이미지가 삭제되었습니다. Cloudflare Pages가 자동으로 다시 배포됩니다.');
+    } catch (error) {
+      setStatusMessage('error', error instanceof Error ? error.message : '사업 분야 이미지 삭제에 실패했습니다.');
+    }
+  }
+
   async function handleAchievementImageUpload() {
     if (!content) {
       setStatusMessage('error', '먼저 데이터를 불러와주세요.');
@@ -611,6 +707,8 @@ export default function Admin() {
     setSelectedHeroImage(null);
     setSelectedAboutImages([]);
     setAboutImagePreviewUrls({});
+    setSelectedServiceImages([]);
+    setServiceImagePreviewUrls({});
     setSelectedAchievementImages([]);
     setAchievementImagePreviewUrls({});
 
@@ -1174,6 +1272,107 @@ export default function Admin() {
                     <EmptyImageBox
                       text="등록된 회사소개 이미지가 없습니다."
                       subText="이미지가 없으면 기존 MIN YOUNG 카드가 표시됩니다."
+                    />
+                  )}
+                </div>
+              </div>
+            </AdminSection>
+
+            <AdminSection
+              title="사업 분야 슬라이드 이미지"
+              description={`주요 사업 분야 섹션의 좌측에 표시될 이미지를 관리합니다. 최대 ${MAX_SERVICE_IMAGES}장까지 등록할 수 있으며, 여러 장이면 자동으로 전환됩니다.`}
+            >
+              <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-start">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <div className="flex items-center gap-3 text-slate-900">
+                    <ImagePlus size={22} className="text-blue-600" />
+                    <div>
+                      <h3 className="font-bold">사업 분야 이미지 추가</h3>
+                      <p className="mt-1 text-sm text-slate-500">
+                        JPG, PNG, WEBP, GIF 파일을 사용할 수 있습니다. 현재 {serviceImages.length}/{MAX_SERVICE_IMAGES}장 등록되어 있습니다.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(event) => setSelectedServiceImages(Array.from(event.target.files || []))}
+                      className="block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:bg-slate-800"
+                    />
+
+                    {selectedServiceImages.length > 0 && (
+                      <div className="mt-3 rounded-xl bg-white p-3 text-sm text-slate-600">
+                        <p className="font-bold text-slate-800">
+                          선택된 파일 {selectedServiceImages.length}개
+                        </p>
+
+                        <ul className="mt-2 max-h-36 space-y-1 overflow-auto pr-1">
+                          {selectedServiceImages.map((file, index) => (
+                            <li key={`${file.name}-${index}`} className="break-all text-xs text-slate-500">
+                              {index + 1}. {file.name}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-5">
+                    <button
+                      type="button"
+                      onClick={handleServiceImageUpload}
+                      disabled={isBusy || selectedServiceImages.length === 0 || serviceImages.length >= MAX_SERVICE_IMAGES}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isBusy ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
+                      사업 분야 이미지 추가
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-sm font-bold text-slate-700">등록된 사업 분야 이미지</p>
+
+                  {serviceImages.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      {serviceImages.map((image, index) => (
+                        <div key={`${image}-${index}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                          <div className="aspect-[4/3] bg-slate-50 p-2">
+                            <img
+                              src={serviceImagePreviewUrls[image] || image}
+                              alt={`사업 분야 이미지 ${index + 1}`}
+                              className="h-full w-full object-contain"
+                              onError={(event) => {
+                                event.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          </div>
+
+                          <div className="space-y-2 border-t border-slate-200 p-3">
+                            <p className="truncate text-xs font-bold text-slate-600">
+                              사업 분야 {index + 1}
+                            </p>
+
+                            <button
+                              type="button"
+                              onClick={() => handleServiceImageDelete(image)}
+                              disabled={isBusy}
+                              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {isBusy ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                              삭제
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <EmptyImageBox
+                      text="등록된 사업 분야 이미지가 없습니다."
+                      subText="이미지가 없으면 기본 다크 안내 박스가 표시됩니다."
                     />
                   )}
                 </div>
