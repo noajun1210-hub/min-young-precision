@@ -8,6 +8,7 @@ export default function Header() {
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
+
     return () => {
       document.body.style.overflow = '';
     };
@@ -17,16 +18,18 @@ export default function Header() {
     setIsOpen(false);
   }
 
+  const logoFirstPart = company.name.replace('정밀', '');
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <a
           href="#top"
           onClick={closeMenu}
-          className="flex items-center gap-2 text-2xl font-black tracking-tight text-slate-950"
+          className="flex items-center text-2xl font-black tracking-tight text-slate-950"
           aria-label={`${company.name} 홈으로 이동`}
         >
-          <span>{company.name.replace('정밀', '')}</span>
+          <span>{logoFirstPart}</span>
           <span className="text-brand-blue">정밀</span>
         </a>
 
