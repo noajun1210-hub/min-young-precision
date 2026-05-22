@@ -134,7 +134,20 @@
         "description": "최신 설비를 통한 복합 정밀 가공 및 대량 대응",
         "icon": "database"
       }
-    ]
+    ],
+    "images": [
+      "/uploads/service-slide-1779439906502.webp",
+      "/uploads/service-slide-1779439909210.webp",
+      "/uploads/service-slide-1779439911716.webp",
+      "/uploads/service-slide-1779439914097.webp",
+      "/uploads/service-slide-1779439916129.webp",
+      "/uploads/service-slide-1779439918126.webp",
+      "/uploads/service-slide-1779439919803.jpg",
+      "/uploads/service-slide-1779439921821.jpg",
+      "/uploads/service-slide-1779439923895.jpg",
+      "/uploads/service-slide-1779439926259.webp"
+    ],
+    "slideIntervalMs": 4000
   },
   "expertise": {
     "eyebrow": "Our Expertise",
