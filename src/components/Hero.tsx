@@ -1,70 +1,68 @@
-import { ChevronRight } from 'lucide-react';
 import siteContent from '../data/siteContent.json';
 
 export default function Hero() {
   const { hero } = siteContent;
-  const titleParts = hero.title.split(hero.highlight);
-  const hasBackgroundImage = Boolean(hero.backgroundImage);
+
+  const titleParts = hero.highlight
+    ? hero.title.split(hero.highlight)
+    : [hero.title];
 
   return (
     <section
-      className="relative h-screen flex items-center justify-center bg-metal-gradient overflow-hidden"
-      style={
-        hasBackgroundImage
-          ? {
-              backgroundImage: `url(${hero.backgroundImage})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            }
-          : undefined
-      }
+      id="top"
+      className="relative min-h-[calc(100svh-4rem)] overflow-hidden bg-brand-dark text-white"
     >
-      {hasBackgroundImage ? (
-        <div className="absolute inset-0 bg-slate-950/70"></div>
-      ) : (
-        <>
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-              backgroundSize: '40px 40px',
-            }}
-          ></div>
-          <div className="absolute inset-0 bg-slate-950/10"></div>
-        </>
+      {hero.backgroundImage && (
+        <img
+          src={hero.backgroundImage}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover opacity-45"
+        />
       )}
 
-      <div className="relative z-10 text-center px-4 animate-fade-in">
-        <h2 className="text-brand-blue font-bold tracking-widest mb-4 text-lg md:text-xl uppercase">
-          {hero.eyebrow}
-        </h2>
+      <div className="absolute inset-0 bg-slate-950/70"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.28),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.18),transparent_34%)]"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
-        <h1 className="text-4xl md:text-7xl font-extrabold text-white mb-6 tracking-tight leading-tight">
-          {titleParts[0]}
-          <span className="text-brand-accent">{hero.highlight}</span>
-          {titleParts[1]}
-        </h1>
+      <div className="relative z-10 mx-auto flex min-h-[calc(100svh-4rem)] max-w-7xl items-center justify-center px-4 py-20 text-center sm:px-6 lg:px-8">
+        <div className="w-full">
+          <p className="text-xs font-black uppercase tracking-[0.32em] text-brand-blue sm:text-sm md:text-lg">
+            {hero.eyebrow}
+          </p>
 
-        <p className="text-lg md:text-2xl text-slate-300 mb-10 max-w-3xl mx-auto font-light leading-relaxed whitespace-pre-line">
-          {hero.description}
-        </p>
+          <h1 className="mx-auto mt-5 max-w-6xl text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl md:text-7xl lg:text-8xl">
+            {hero.highlight ? (
+              <>
+                {titleParts[0]}
+                <span className="block text-brand-blue sm:inline">{hero.highlight}</span>
+                {titleParts.slice(1).join(hero.highlight)}
+              </>
+            ) : (
+              hero.title
+            )}
+          </h1>
 
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <a
-            href={hero.primaryButton.href}
-            className="bg-brand-blue hover:bg-blue-700 text-white px-8 py-4 rounded-md font-bold transition-all transform hover:-translate-y-1 shadow-lg"
-          >
-            {hero.primaryButton.label}
-          </a>
+          <p className="mx-auto mt-6 max-w-3xl whitespace-pre-line text-base leading-relaxed text-slate-200 sm:text-xl md:text-2xl">
+            {hero.description}
+          </p>
 
-          <a
-            href={hero.secondaryButton.href}
-            className="bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm px-8 py-4 rounded-md font-bold border border-white/30 transition-all flex items-center justify-center"
-          >
-            {hero.secondaryButton.label}
-            <ChevronRight size={20} className="ml-1" />
-          </a>
+          <div className="mx-auto mt-10 grid max-w-sm gap-3 sm:flex sm:max-w-none sm:justify-center">
+            <a
+              href={hero.primaryButton.href}
+              className="inline-flex min-h-14 items-center justify-center rounded-xl bg-brand-blue px-8 py-4 text-base font-black text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-700"
+            >
+              {hero.primaryButton.label}
+            </a>
+
+            <a
+              href={hero.secondaryButton.href}
+              className="inline-flex min-h-14 items-center justify-center rounded-xl border border-white/30 bg-white/10 px-8 py-4 text-base font-black text-white backdrop-blur transition hover:bg-white/15"
+            >
+              {hero.secondaryButton.label}
+              <span className="ml-2">›</span>
+            </a>
+          </div>
         </div>
       </div>
     </section>
