@@ -95,6 +95,13 @@ function makeAboutImageFileName(file: File) {
   return `about-slide-${Date.now()}.${extension}`;
 }
 
+function makeAchievementImageFileName(file: File, tabId: string) {
+  const extension = getSafeImageExtension(file);
+  const safeTabId = tabId.replace(/[^a-zA-Z0-9-_]/g, '') || 'achievement';
+
+  return `achievement-${safeTabId}-${Date.now()}.${extension}`;
+}
+
 function normalizePublicImagePath(publicPath: string) {
   const trimmedPath = publicPath.trim();
 
@@ -169,7 +176,12 @@ async function githubRequest<T>(
   return response.json();
 }
 
-async function uploadImageToGitHub(token: string, file: File, fileName: string, commitMessage: string) {
+async function uploadImageToGitHub(
+  token: string,
+  file: File,
+  fileName: string,
+  commitMessage: string
+) {
   validateImageFile(file);
 
   const githubPath = `${UPLOADS_DIRECTORY}/${fileName}`;
@@ -252,6 +264,21 @@ export async function uploadAboutSlideImage(token: string, file: File) {
     file,
     fileName,
     'Upload about slide image'
+  );
+}
+
+export async function uploadAchievementImage(
+  token: string,
+  file: File,
+  tabId: string
+) {
+  const fileName = makeAchievementImageFileName(file, tabId);
+
+  return uploadImageToGitHub(
+    token,
+    file,
+    fileName,
+    `Upload achievement image for ${tabId}`
   );
 }
 
