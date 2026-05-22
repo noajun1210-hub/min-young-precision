@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://minyoung9515.pages.dev/sitemap.xml
