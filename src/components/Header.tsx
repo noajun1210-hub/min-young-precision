@@ -8,6 +8,7 @@ export default function Header() {
   const [logoError, setLogoError] = useState(false);
 
   const logoImage = '/minyoung-logo.PNG';
+  const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
@@ -21,11 +22,23 @@ export default function Header() {
     setIsOpen(false);
   }
 
+  function getNavigationHref(href: string) {
+    if (!href.startsWith('#')) {
+      return href;
+    }
+
+    if (currentPath === '/') {
+      return href;
+    }
+
+    return `/${href}`;
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-28 lg:px-8">
         <a
-          href="#top"
+          href="/"
           onClick={closeMenu}
           className="flex min-w-0 items-center"
           aria-label={`${company.name} 홈으로 이동`}
@@ -49,7 +62,7 @@ export default function Header() {
           {navigation.map((item) => (
             <a
               key={item.href}
-              href={item.href}
+              href={getNavigationHref(item.href)}
               className="text-sm font-bold text-slate-700 transition hover:text-brand-blue"
             >
               {item.label}
@@ -75,7 +88,7 @@ export default function Header() {
               {navigation.map((item) => (
                 <a
                   key={item.href}
-                  href={item.href}
+                  href={getNavigationHref(item.href)}
                   onClick={closeMenu}
                   className="rounded-2xl bg-slate-50 px-4 py-4 text-base font-black text-slate-900 transition active:scale-[0.99]"
                 >
@@ -85,7 +98,7 @@ export default function Header() {
             </div>
 
             <a
-              href="#contact"
+              href={getNavigationHref('#contact')}
               onClick={closeMenu}
               className="mt-4 flex items-center justify-center rounded-2xl bg-brand-blue px-5 py-4 text-base font-black text-white shadow-lg shadow-blue-600/20"
             >
