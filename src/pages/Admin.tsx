@@ -1069,6 +1069,13 @@ export default function Admin() {
                 &#xD648;&#xD398;&#xC774;&#xC9C0;&#xB85C; &#xB3CC;&#xC544;&#xAC00;&#xAE30;
               </a>
 
+              <a
+                href="/admin/pc-preview"
+                className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
+              >
+                PC íë©´ ë¯¸ë¦¬ë³´ê¸°
+              </a>
+
               <button
                 type="button"
                 onClick={handleLogout}
