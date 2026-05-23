@@ -2,7 +2,7 @@ import siteContent from '../data/siteContent.json';
 
 const seoLinks = [
   {
-    label: '회사소개',
+    label: '민영정밀 아산',
     href: '/company',
   },
   {
@@ -21,10 +21,41 @@ const seoLinks = [
     label: '자동차 · 반도체 부품',
     href: '/automotive-semiconductor',
   },
+  {
+    label: '오시는 길',
+    href: '#location',
+  },
+  {
+    label: '문의하기',
+    href: '#contact',
+  },
 ];
 
 export default function Footer() {
   const { company, footer } = siteContent;
+  const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+
+  const addressKeyword = `${company.name} ${company.address}`;
+
+  const naverMapUrl = `https://map.naver.com/p/search/${encodeURIComponent(
+    addressKeyword
+  )}`;
+
+  const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    addressKeyword
+  )}`;
+
+  function getSectionHref(href: string) {
+    if (!href.startsWith('#')) {
+      return href;
+    }
+
+    if (currentPath === '/') {
+      return href;
+    }
+
+    return `/${href}`;
+  }
 
   return (
     <footer className="border-t border-slate-200 bg-white">
@@ -52,7 +83,31 @@ export default function Footer() {
                 <p className="mt-1 break-all">이메일 : {company.email}</p>
               )}
 
-              {company.address && <p className="mt-1">{company.address}</p>}
+              {company.address && (
+                <p className="mt-1 font-bold text-slate-600">
+                  주소 : {company.address}
+                </p>
+              )}
+            </div>
+
+            <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:max-w-md">
+              <a
+                href={naverMapUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center rounded-xl bg-green-600 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-green-700"
+              >
+                네이버지도
+              </a>
+
+              <a
+                href={googleMapUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-black text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+              >
+                구글맵
+              </a>
             </div>
           </div>
 
@@ -64,8 +119,8 @@ export default function Footer() {
             <nav className="mt-4 flex flex-wrap justify-center gap-2 lg:justify-end">
               {seoLinks.map((link) => (
                 <a
-                  key={link.href}
-                  href={link.href}
+                  key={`${link.label}-${link.href}`}
+                  href={getSectionHref(link.href)}
                   className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
                 >
                   {link.label}
