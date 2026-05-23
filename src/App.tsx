@@ -7,6 +7,7 @@ import Expertise from './components/Expertise';
 import Strengths from './components/Strengths';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
+import FloatingContactButtons from './components/FloatingContactButtons';
 import Admin from './pages/Admin';
 import {
   AutomotiveSemiconductorPage,
@@ -51,6 +52,7 @@ function App() {
   return (
     <>
       <Header />
+      <FloatingContactButtons />
       {currentPage}
       <Footer />
     </>
